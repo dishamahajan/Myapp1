@@ -163,10 +163,12 @@ public class MainActivity extends Activity {
         }
     }
 
+/*
     private boolean hasPermission(String permission){
         if (canMa){
             return (checkSelfPermission(permission))== PackageManager.PERMISSION_GRANTED;
         }
         return true;
     }
+*/
 }
