@@ -54,9 +54,9 @@ public class MainActivity extends Activity {
             return;
         }
 
-        String[] perm= {"android.permission.CAMERA"};
+        String[] perms = {"android.permission.FLASHLIGHT", "android.permission.CAMERA"};
         int permsRequestCode = 200;
-        requestPermissions(perm,permsRequestCode);
+        requestPermissions(perms,permsRequestCode);
         objCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             mCameraId = objCameraManager.getCameraIdList()[0];
@@ -158,17 +158,23 @@ public class MainActivity extends Activity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
             case 200:
-                boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                boolean flashLightAccepted = grantResults[0]==PackageManager.PERMISSION_GRANTED;
+                boolean cameraAccepted = grantResults[1]==PackageManager.PERMISSION_GRANTED;
                 break;
         }
     }
 
-/*
     private boolean hasPermission(String permission){
-        if (canMa){
+        if (canMakeSmores()){
             return (checkSelfPermission(permission))== PackageManager.PERMISSION_GRANTED;
         }
         return true;
     }
-*/
+
+    private boolean canMakeSmores(){
+
+        return(Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP_MR1);
+
+    }
+
 }
