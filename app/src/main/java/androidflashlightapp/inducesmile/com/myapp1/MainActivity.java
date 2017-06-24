@@ -7,12 +7,12 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
-import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.ImageButton;
+import android.widget.Toolbar;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -22,7 +22,7 @@ public class MainActivity extends Activity {
 
     private CameraManager objCameraManager;
     private String mCameraId;
-    private ImageView isOnOFF;
+    private ImageButton isOnOFF;
     private Boolean isTorchOn;
     private AdView mAdView;
 
@@ -30,7 +30,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        isOnOFF = (ImageView) findViewById(R.id.isOnOFF);
+        isOnOFF = (ImageButton) findViewById(R.id.isOnOFF);
         isTorchOn = false;
 
         Boolean isFlashAvailable = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 try {
-                    if(canMakeSmores() && !hasPermission("android.permission.CAMERA")){
+                    if(!hasPermission("android.permission.CAMERA")){
                         permissionDialogBox();
                     }else{
                         if (isTorchOn) {
@@ -93,14 +93,10 @@ public class MainActivity extends Activity {
         requestPermissions(perms,permsRequestCode);
     }
 
-    /**
-     * Method for turning light ON
-     */
     public void turnOnLight() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 objCameraManager.setTorchMode(mCameraId, true);
-                //playOnOffSound();
                 isOnOFF.setImageResource(R.drawable.on);
             }
         } catch (Exception e) {
@@ -108,14 +104,10 @@ public class MainActivity extends Activity {
         }
     }
 
-    /**
-     * Method for turning light OFF
-     */
     public void turnOffLight() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 objCameraManager.setTorchMode(mCameraId, false);
-                //playOnOffSound();
                 isOnOFF.setImageResource(R.drawable.off);
             }
         } catch (Exception e) {
@@ -132,42 +124,24 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (isTorchOn) {
-            turnOffLight();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (isTorchOn) {
-            turnOnLight();
-        }
-    }
-
-    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
+        switch (requestCode) {
             case 200:
-                boolean flashLightAccepted = grantResults[0]==PackageManager.PERMISSION_GRANTED;
-                boolean cameraAccepted = grantResults[1]==PackageManager.PERMISSION_GRANTED;
+                boolean flashLightAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                boolean cameraAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
                 break;
         }
     }
 
-    private boolean hasPermission(String permission){
-        if (canMakeSmores()){
-            return (checkSelfPermission(permission))== PackageManager.PERMISSION_GRANTED;
+    private boolean hasPermission(String permission) {
+        if (canMakeSmores()) {
+            return (checkSelfPermission(permission)) == PackageManager.PERMISSION_GRANTED;
         }
         return true;
     }
 
-    private boolean canMakeSmores(){
-
-        return(Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP_MR1);
-
+    private boolean canMakeSmores() {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
     }
 
 }
