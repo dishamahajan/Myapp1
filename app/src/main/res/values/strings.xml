@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Spaceo FlashLight</string>
+    <string name="app_name">FlashLight Lite</string>
     <string name="msg_error">Your device doesn\'t support flash light!</string>
     <string name="lbl_ok">OK</string>
     <string name="action_settings">Settings</string>
