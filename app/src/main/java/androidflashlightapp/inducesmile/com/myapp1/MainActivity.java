@@ -14,12 +14,17 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+
 public class MainActivity extends Activity {
 
     private CameraManager objCameraManager;
     private String mCameraId;
     private ImageView isOnOFF;
     private Boolean isTorchOn;
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +79,12 @@ public class MainActivity extends Activity {
                 }
             }
         });
+
+        // Sample AdMob app ID: ca-app-pub-7860341576927713~5587659182
+        MobileAds.initialize(this, "ca-app-pub-7860341576927713~5587659182");
+        mAdView = (AdView) findViewById(R.id.adViewAd);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
     private void permissionDialogBox() {
