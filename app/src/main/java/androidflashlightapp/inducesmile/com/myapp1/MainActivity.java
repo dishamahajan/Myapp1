@@ -15,22 +15,36 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.michaelmuenzer.android.scrollablennumberpicker.ScrollableNumberPicker;
+import com.michaelmuenzer.android.scrollablennumberpicker.ScrollableNumberPickerListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity {
+import yuku.ambilwarna.AmbilWarnaDialog;
+
+public class MainActivity extends AppCompatActivity implements OnCheckedChangeListener{
 
     private CameraManager objCameraManager;
     private String mCameraId;
@@ -42,13 +56,59 @@ public class MainActivity extends AppCompatActivity {
     private CameraCaptureSession session;
     private CaptureRequest.Builder builder;
     Camera.Parameters parameters;
+    PowerManager pm;
+    Boolean screenOn;
+    Timer mTimer;
+    TimerTask mTimerTask;
+    private Handler mTimerHandler = new Handler();
+    private Handler mTimerHandler1 = new Handler();
+    private SwitchCompat blinker;
+    private SwitchCompat timer;
+    boolean blink;
+    boolean time;
+    Context context;
+    int blickTimeValue = 100;
+    int timerTimeValue = 1000;
+    int globalValue;
+    int duration;
+    Toast toast ;
+
+    Button button;
+    RelativeLayout relativeLayout;
+    int DefaultColor ;
+
+    private Runnable runnableCode;
+    private Runnable runnableCode1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        relativeLayout = (RelativeLayout) findViewById(R.id.main);
+        button = (Button) findViewById(R.id.button);
+        DefaultColor = ContextCompat.getColor(MainActivity.this, R.color.white);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                OpenColorPickerDialog(false);
+            }
+        });
+
         isOnOFF = (ImageButton) findViewById(R.id.isOnOFF);
         isTorchOn = false;
+        this.pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        screenOn = this.pm.isScreenOn();
+
+        blinker = (SwitchCompat) findViewById(R.id.blinker);
+        blinker.setOnCheckedChangeListener(this);
+        blinker.setChecked(false);
+
+        timer = (SwitchCompat) findViewById(R.id.timer);
+        timer.setOnCheckedChangeListener(this);
+        timer.setChecked(false);
+
 
         Boolean isFlashAvailable = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
 
@@ -64,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
             alert.show();
             return;
         }
+
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -93,13 +154,14 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getCamera();
         }
+
         isOnOFF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
                     if (checkVersion() && !hasPermission("android.permission.CAMERA")) {
                         permissionDialogBox();
-                    } else {
+                    }else {
                         if (isTorchOn) {
                             if (camera != null) {
                                 turnOffFlash();
@@ -122,11 +184,181 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Sample AdMob app ID: ca-app-pub-7860341576927713~5587659182
+
+
+        final ScrollableNumberPicker blinkerNumberPicker = (ScrollableNumberPicker) findViewById(R.id.number_picker_blinker);
+        blinkerNumberPicker.setListener(new ScrollableNumberPickerListener() {
+            @Override
+            public void onNumberPicked(int value) {
+               blickTimeValue = value;
+            }
+        });
+
+        final ScrollableNumberPicker timerNumberPicker = (ScrollableNumberPicker) findViewById(R.id.number_picker_timer);
+        timerNumberPicker.setListener(new ScrollableNumberPickerListener() {
+            @Override
+            public void onNumberPicked(int value) {
+                timerTimeValue = value;
+            }
+        });
+
+/*
+
+        mTimer = new Timer();
+        mTimerTask = new TimerTask() {
+            public void run() {
+                mTimerHandler.post(new Runnable() {
+                    public void run() {
+                        if (!pm.isScreenOn() && pm.isScreenOn() != screenOn && isTorchOn) {
+                            if (camera != null) {
+                                turnOffFlash();
+                                turnOnFlash();
+                            } else {
+                                turnOffLight();
+                                turnOnLight();
+                            }
+                            isTorchOn = true;
+                        }
+                        screenOn = pm.isScreenOn();
+
+                    }
+                });
+            }
+        };
+        mTimer.schedule(mTimerTask,0,10);
+*/
+
+         runnableCode = new Runnable() {
+
+             @Override
+            public void run() {
+                if(blink) {
+                    if (camera != null) {
+                        turnOnFlash();
+                        try {
+                            Thread.sleep(blickTimeValue);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        turnOffFlash();
+                    } else {
+                        turnOnLight();
+                        try {
+                            Thread.sleep(blickTimeValue);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        turnOffLight();
+                    }
+                }else if(time) {
+                    if (camera != null) {
+                        turnOffFlash();
+                    } else {
+                        turnOffLight();
+                    }
+                    time= false;
+                    SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
+                    switchCompat.setChecked(false);
+
+                }
+                screenOn = pm.isScreenOn();
+                mTimerHandler.postDelayed(runnableCode, blickTimeValue);
+            }
+        };
+        mTimerHandler.post(runnableCode);
+
+
+        runnableCode1 = new Runnable() {
+
+            @Override
+            public void run() {
+                if(time) {
+                    if (camera != null) {
+                        turnOffFlash();
+                    } else {
+                        turnOffLight();
+                    }
+                    time= false;
+                    SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
+                    switchCompat.setChecked(false);
+
+                }
+                mTimerHandler1.postDelayed(runnableCode1, timerTimeValue);
+            }
+        };
+        mTimerHandler1.post(runnableCode1);
+
+
         MobileAds.initialize(this, "ca-app-pub-7860341576927713~5587659182");
         mAdView = (AdView) findViewById(R.id.adViewAd);
-        AdRequest adRequest = new AdRequest.Builder().build();
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("D8D6B049EDAB3CB2227DD36B3ED29F2D")
+                .addTestDevice("25F149879ED72631F3CB460DEED0436A")
+                .addTestDevice("B117F7C5611FB5503E6D2BD2CCA8C928")
+                .build();
         mAdView.loadAd(adRequest);
+
+    }
+
+    private void OpenColorPickerDialog(boolean AlphaSupport) {
+
+        AmbilWarnaDialog ambilWarnaDialog = new AmbilWarnaDialog(MainActivity.this, DefaultColor, AlphaSupport, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+            @Override
+            public void onOk(AmbilWarnaDialog ambilWarnaDialog, int color) {
+                DefaultColor = color;
+                relativeLayout.setBackgroundColor(color);
+            }
+
+            @Override
+            public void onCancel(AmbilWarnaDialog ambilWarnaDialog) {
+                Toast.makeText(MainActivity.this, "Color Picker Closed", Toast.LENGTH_SHORT).show();
+            }
+        });
+        ambilWarnaDialog.show();
+    }
+
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if(R.id.blinker == buttonView.getId()) {
+            globalValue = blickTimeValue;
+            SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
+            switchCompat.setChecked(false);
+            if (isChecked) {
+                blink = true;
+                time = false;
+                duration = Toast.LENGTH_SHORT;
+                toast = Toast.makeText(MainActivity.this, "Blinker : ON", duration);
+                toast.show();
+            } else {
+                blink = false;
+                duration = Toast.LENGTH_SHORT;
+                toast = Toast.makeText(MainActivity.this, "Blinker : OFF", duration);
+                toast.show();
+            }
+        }
+        if(R.id.timer == buttonView.getId()) {
+            globalValue = timerTimeValue;
+            SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
+            switchCompat.setChecked(false);
+            if (isChecked) {
+                time = true;
+                blink = false;
+                if (camera != null) {
+                    turnOnFlash();
+                } else {
+                    turnOnLight();
+                }
+                duration = Toast.LENGTH_SHORT;
+                toast = Toast.makeText(MainActivity.this, "Timer : ON", duration);
+                toast.show();
+            } else {
+                time = false;
+                duration = Toast.LENGTH_SHORT;
+                toast = Toast.makeText(MainActivity.this, "Timer : OFF", duration);
+                toast.show();
+            }
+        }
     }
 
     class CameraDeviceStateCallback extends CameraDevice.StateCallback {
@@ -275,10 +507,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getCamera() {
-        if (camera == null) {
+        if (this.camera == null) {
             try {
-                camera = Camera.open();
-                parameters = camera.getParameters();
+                this.camera = Camera.open();
+                this.parameters = this.camera.getParameters();
             } catch (Exception e) {
 
             }
@@ -286,31 +518,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void turnOnFlash() {
-        if (!isTorchOn) {
-            if (camera == null || parameters == null) {
-                return;
-            }
-            parameters = camera.getParameters();
-            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-            camera.setParameters(parameters);
-            camera.startPreview();
-            isOnOFF.setImageResource(R.drawable.on);
-            isTorchOn = true;
+        if (this.camera == null || this.parameters == null) {
+            return;
         }
+        this.parameters = camera.getParameters();
+        this.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        this.camera.setParameters(parameters);
+        this.camera.startPreview();
+        isOnOFF.setImageResource(R.drawable.on);
+        isTorchOn = true;
     }
-
 
     private void turnOffFlash() {
-        if (isTorchOn) {
-            if (camera == null || parameters == null) {
-                return;
-            }
-            parameters = camera.getParameters();
-            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-            camera.setParameters(parameters);
-            camera.stopPreview();
-            isOnOFF.setImageResource(R.drawable.off);
-            isTorchOn = false;
+        if (this.camera == null || this.parameters == null) {
+            return;
         }
+        this.parameters = this.camera.getParameters();
+        this.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        this.camera.setParameters(parameters);
+        this.camera.stopPreview();
+        isOnOFF.setImageResource(R.drawable.off);
+        isTorchOn = false;
     }
+
+
 }
+
