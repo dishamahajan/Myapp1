@@ -1,8 +1,11 @@
 package androidflashlightapp.inducesmile.com.myapp1;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -18,8 +21,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Size;
 import android.view.Surface;
@@ -29,6 +34,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -80,6 +86,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private Runnable runnableCode;
     private Runnable runnableCode1;
 
+    NotificationCompat.Builder notification;
+    private NotificationManager mNotificationManager;
+    private static final int notification_id = 123456;
+    private RemoteViews remoteViews;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,14 +112,19 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         this.pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         screenOn = this.pm.isScreenOn();
 
+        //for blinker
         blinker = (SwitchCompat) findViewById(R.id.blinker);
         blinker.setOnCheckedChangeListener(this);
         blinker.setChecked(false);
 
+        //for timer
         timer = (SwitchCompat) findViewById(R.id.timer);
         timer.setOnCheckedChangeListener(this);
         timer.setChecked(false);
 
+        //for notification
+        notification = new NotificationCompat.Builder(this);
+        notification.setAutoCancel(true);
 
         Boolean isFlashAvailable = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
 
@@ -163,6 +179,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         permissionDialogBox();
                     }else {
                         if (isTorchOn) {
+                            mNotificationManager.cancel(notification_id);
+
                             if (camera != null) {
                                 turnOffFlash();
                             } else {
@@ -170,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                             }
                             isTorchOn = false;
                         } else {
+                            showNotification();
                             if (camera != null) {
                                 turnOnFlash();
                             } else {
@@ -298,6 +317,25 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 .build();
         mAdView.loadAd(adRequest);
 
+    }
+
+    private void showNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            notification.setSmallIcon(R.drawable.notification_icon);
+        } else {
+            notification.setSmallIcon(R.drawable.ic_launcher);
+        }
+        notification.setTicker("Flash is ON!");
+        notification.setWhen(System.currentTimeMillis());
+        notification.setContentTitle("Flashlight Lite");
+        notification.setContentText("Flash is ON! Click to turn it OFF!");
+
+        Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(),0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        notification.setContentIntent(pendingIntent);
+
+        mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.notify(notification_id,notification.build());
     }
 
     private void OpenColorPickerDialog(boolean AlphaSupport) {
@@ -476,9 +514,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     @Override
     protected void onStop() {
         super.onStop();
-        if (isTorchOn) {
-            turnOffLight();
-        }
         if (camera != null) {
             camera.release();
             camera = null;
