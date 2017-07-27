@@ -78,12 +78,15 @@
         android:paddingStart="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        app:snp_maxValue="1000"
-        app:snp_minValue="50"
+        app:snp_maxValue="10"
+        app:snp_minValue="1"
         app:snp_orientation="horizontal"
-        app:snp_stepSize="50"
-        app:snp_updateInterval="100"
-        app:snp_value="100"
+        app:snp_stepSize="1"
+        app:snp_updateInterval="1"
+        app:snp_value="1"
+        app:snp_value_text_color="@color/white"
+        app:snp_value_text_appearance="?android:attr/textAppearanceMedium"
+        app:snp_buttonBackgroundTintSelector="@color/white"
         android:layout_alignBottom="@+id/timer"
         android:layout_alignLeft="@+id/number_picker_blinker"
         android:layout_alignStart="@+id/number_picker_blinker"
@@ -102,7 +105,7 @@
         android:duplicateParentState="false"
         android:scaleType="fitCenter"
         android:src="@drawable/off"
-        android:background="@null"/>
+        android:background="?attr/selectableItemBackgroundBorderless"/>
 
     <Button
         android:id="@+id/button"
@@ -112,6 +115,18 @@
         android:layout_gravity="center"
         android:layout_marginBottom="34dp"
         android:text="Color Picker"
+        android:layout_above="@+id/timePicker"
+        android:layout_centerHorizontal="true"
+        />
+
+    <Button
+        android:id="@+id/timePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_marginBottom="34dp"
+        android:text="Time Picker"
         android:layout_above="@+id/adViewAd"
         android:layout_centerHorizontal="true"
         />

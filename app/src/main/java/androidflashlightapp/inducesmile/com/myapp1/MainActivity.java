@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
@@ -50,7 +49,7 @@ import java.util.TimerTask;
 
 import yuku.ambilwarna.AmbilWarnaDialog;
 
-public class MainActivity extends AppCompatActivity implements OnCheckedChangeListener{
+public class MainActivity extends AppCompatActivity implements OnCheckedChangeListener {
 
     private CameraManager objCameraManager;
     private String mCameraId;
@@ -77,14 +76,16 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     int timerTimeValue = 1000;
     int globalValue;
     int duration;
-    Toast toast ;
+    Toast toast;
 
     Button button;
     RelativeLayout relativeLayout;
-    int DefaultColor ;
+    int DefaultColor;
 
     private Runnable runnableCode;
     private Runnable runnableCode1;
+
+    Button timerPicker;
 
     NotificationCompat.Builder notification;
     private NotificationManager mNotificationManager;
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         isTorchOn = false;
         this.pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         screenOn = this.pm.isScreenOn();
+        timerPicker = (Button) findViewById(R.id.timePicker);
 
         //for blinker
         blinker = (SwitchCompat) findViewById(R.id.blinker);
@@ -141,8 +143,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             return;
         }
 
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             permissionDialogBox();
             objCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
@@ -170,14 +170,23 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         } else {
             getCamera();
         }
-
+        if (checkVersion() && !hasPermission("android.permission.CAMERA")) {
+            permissionDialogBox();
+        } else {
+            if (camera != null) {
+                turnOnFlash();
+            } else {
+                turnOnLight();
+            }
+            isTorchOn = false;
+        }
         isOnOFF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
                     if (checkVersion() && !hasPermission("android.permission.CAMERA")) {
                         permissionDialogBox();
-                    }else {
+                    } else {
                         if (isTorchOn) {
                             mNotificationManager.cancel(notification_id);
 
@@ -203,13 +212,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         });
 
-
-
         final ScrollableNumberPicker blinkerNumberPicker = (ScrollableNumberPicker) findViewById(R.id.number_picker_blinker);
         blinkerNumberPicker.setListener(new ScrollableNumberPickerListener() {
             @Override
             public void onNumberPicked(int value) {
-               blickTimeValue = value;
+                blickTimeValue = value;
             }
         });
 
@@ -217,41 +224,15 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         timerNumberPicker.setListener(new ScrollableNumberPickerListener() {
             @Override
             public void onNumberPicked(int value) {
-                timerTimeValue = value;
+                timerTimeValue = value * 1000;
             }
         });
 
-/*
-
-        mTimer = new Timer();
-        mTimerTask = new TimerTask() {
+        //runnable for blinker
+        runnableCode = new Runnable() {
+            @Override
             public void run() {
-                mTimerHandler.post(new Runnable() {
-                    public void run() {
-                        if (!pm.isScreenOn() && pm.isScreenOn() != screenOn && isTorchOn) {
-                            if (camera != null) {
-                                turnOffFlash();
-                                turnOnFlash();
-                            } else {
-                                turnOffLight();
-                                turnOnLight();
-                            }
-                            isTorchOn = true;
-                        }
-                        screenOn = pm.isScreenOn();
-
-                    }
-                });
-            }
-        };
-        mTimer.schedule(mTimerTask,0,10);
-*/
-
-         runnableCode = new Runnable() {
-
-             @Override
-            public void run() {
-                if(blink) {
+                if (blink) {
                     if (camera != null) {
                         turnOnFlash();
                         try {
@@ -269,16 +250,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         }
                         turnOffLight();
                     }
-                }else if(time) {
-                    if (camera != null) {
-                        turnOffFlash();
-                    } else {
-                        turnOffLight();
-                    }
-                    time= false;
-                    SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
-                    switchCompat.setChecked(false);
-
                 }
                 screenOn = pm.isScreenOn();
                 mTimerHandler.postDelayed(runnableCode, blickTimeValue);
@@ -286,28 +257,34 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         };
         mTimerHandler.post(runnableCode);
 
-
+        //runnable for timer
         runnableCode1 = new Runnable() {
-
             @Override
             public void run() {
-                if(time) {
+                if (time) {
                     if (camera != null) {
                         turnOffFlash();
                     } else {
                         turnOffLight();
                     }
-                    time= false;
+                    time = false;
                     SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                     switchCompat.setChecked(false);
-
+                    time = false;
                 }
                 mTimerHandler1.postDelayed(runnableCode1, timerTimeValue);
             }
         };
         mTimerHandler1.post(runnableCode1);
 
+        timerPicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                OpenTimePicker();
+            }
+        });
 
+        //Admob
         MobileAds.initialize(this, "ca-app-pub-7860341576927713~5587659182");
         mAdView = (AdView) findViewById(R.id.adViewAd);
         AdRequest adRequest = new AdRequest.Builder()
@@ -316,6 +293,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 .addTestDevice("B117F7C5611FB5503E6D2BD2CCA8C928")
                 .build();
         mAdView.loadAd(adRequest);
+
+    }
+
+    private void OpenTimePicker() {
 
     }
 
@@ -330,12 +311,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         notification.setContentTitle("Flashlight Lite");
         notification.setContentText("Flash is ON! Click to turn it OFF!");
 
-        Intent intent = new Intent(getApplicationContext(),MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(),0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notification.setContentIntent(pendingIntent);
 
-        mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        mNotificationManager.notify(notification_id,notification.build());
+        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.notify(notification_id, notification.build());
     }
 
     private void OpenColorPickerDialog(boolean AlphaSupport) {
@@ -358,11 +339,25 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(R.id.blinker == buttonView.getId()) {
-            globalValue = blickTimeValue;
-            SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
-            switchCompat.setChecked(false);
+        final ScrollableNumberPicker blinkerNumberPicker = (ScrollableNumberPicker) findViewById(R.id.number_picker_blinker);
+        blinkerNumberPicker.setListener(new ScrollableNumberPickerListener() {
+            @Override
+            public void onNumberPicked(int value) {
+                blickTimeValue = value;
+            }
+        });
+
+        final ScrollableNumberPicker timerNumberPicker = (ScrollableNumberPicker) findViewById(R.id.number_picker_timer);
+        timerNumberPicker.setListener(new ScrollableNumberPickerListener() {
+            @Override
+            public void onNumberPicked(int value) {
+                timerTimeValue = value * 1000;
+            }
+        });
+        if (R.id.blinker == buttonView.getId()) {
             if (isChecked) {
+                SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
+                switchCompat.setChecked(false);
                 blink = true;
                 time = false;
                 duration = Toast.LENGTH_SHORT;
@@ -375,11 +370,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 toast.show();
             }
         }
-        if(R.id.timer == buttonView.getId()) {
-            globalValue = timerTimeValue;
-            SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
-            switchCompat.setChecked(false);
+        if (R.id.timer == buttonView.getId()) {
             if (isChecked) {
+                SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
+                switchCompat.setChecked(false);
                 time = true;
                 blink = false;
                 if (camera != null) {
@@ -393,6 +387,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             } else {
                 time = false;
                 duration = Toast.LENGTH_SHORT;
+                if (camera != null) {
+                    turnOffFlash();
+                } else {
+                    turnOffLight();
+                }
                 toast = Toast.makeText(MainActivity.this, "Timer : OFF", duration);
                 toast.show();
             }
@@ -400,7 +399,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     }
 
     class CameraDeviceStateCallback extends CameraDevice.StateCallback {
-
         @Override
         public void onOpened(CameraDevice camera) {
             cameraDevice = camera;
@@ -433,7 +431,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     }
 
     class CameraCaptureSessionStateCallback extends CameraCaptureSession.StateCallback {
-
         @Override
         public void onConfigured(CameraCaptureSession session) {
             MainActivity.this.session = session;
