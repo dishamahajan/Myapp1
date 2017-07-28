@@ -68,6 +68,7 @@
         android:shadowRadius="1.6"
         android:theme="@style/NewTheme"
         />
+<!--
 
     <com.michaelmuenzer.android.scrollablennumberpicker.ScrollableNumberPicker
         android:id="@+id/number_picker_timer"
@@ -92,6 +93,7 @@
         android:layout_alignStart="@+id/number_picker_blinker"
         android:layout_marginBottom="13dp" />
 
+-->
     <ImageButton
         android:id="@+id/isOnOFF"
         android:padding="20dp"
@@ -113,12 +115,19 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_gravity="center"
-        android:layout_marginBottom="34dp"
+        android:layout_marginBottom="10dp"
         android:text="Color Picker"
-        android:layout_above="@+id/timePicker"
+        android:layout_below="@+id/isOnOFF"
         android:layout_centerHorizontal="true"
         />
-
+<TextView
+    android:id="@+id/timerText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"
+    android:layout_above="@+id/button"
+    android:layout_marginBottom="10dp"
+    />
     <Button
         android:id="@+id/timePicker"
         android:layout_width="wrap_content"

@@ -40,4 +40,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:10.2.4'
     compile 'com.michaelmuenzer.android:ScrollableNumberPicker:0.2.2'
     compile 'com.github.yukuku:ambilwarna:2.0.1'
+    compile 'mobi.upod:time-duration-picker:1.1.1'
 }

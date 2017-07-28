@@ -1,6 +1,7 @@
 package androidflashlightapp.inducesmile.com.myapp1;
 
 import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -18,6 +19,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
@@ -34,6 +36,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -46,6 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import yuku.ambilwarna.AmbilWarnaDialog;
 
@@ -66,18 +70,19 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     Timer mTimer;
     TimerTask mTimerTask;
     private Handler mTimerHandler = new Handler();
-    private Handler mTimerHandler1 = new Handler();
+    /*private Handler mTimerHandler1 = new Handler();
+    */
     private SwitchCompat blinker;
     private SwitchCompat timer;
     boolean blink;
     boolean time;
+    private CountDownTimer countDownTimer;
     Context context;
     int blickTimeValue = 100;
-    int timerTimeValue = 1000;
-    int globalValue;
+  /*  int timerTimeValue = 1000;*/
     int duration;
     Toast toast;
-
+    public static long timepickerDuration = 30 * 1000;
     Button button;
     RelativeLayout relativeLayout;
     int DefaultColor;
@@ -91,6 +96,67 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private NotificationManager mNotificationManager;
     private static final int notification_id = 123456;
     private RemoteViews remoteViews;
+    private TextView timerText;
+
+    private String hmsTimeFormatter(long milliSeconds) {
+
+        String hms = String.format("%02d:%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(milliSeconds),
+                TimeUnit.MILLISECONDS.toMinutes(milliSeconds) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(milliSeconds)),
+                TimeUnit.MILLISECONDS.toSeconds(milliSeconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliSeconds)));
+
+        return hms;
+
+
+    }
+
+    private void stopCountDownTimer() {
+        timerText.setText("");
+        countDownTimer.cancel();
+    }
+
+    private void startCountDownTimer() {
+
+        countDownTimer = new CountDownTimer(timepickerDuration, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if (camera != null) {
+                    turnOnFlash();
+                } else {
+                    turnOnLight();
+                }
+                timerText.setText(hmsTimeFormatter(millisUntilFinished));
+            }
+
+            @Override
+            public void onFinish() {
+                if (camera != null) {
+                    turnOffFlash();
+                } else {
+                    turnOffLight();
+                }
+                SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
+                switchCompat.setChecked(false);
+                timerText.setText("");
+                toast = Toast.makeText(MainActivity.this, "Timer : OFF", duration);
+                toast.show();
+                //           textViewTime.setText(hmsTimeFormatter(timeCountInMilliSeconds));
+                // call to initialize the progress bar values
+                //         setProgressBarValues();
+                // hiding the reset icon
+                //       imageViewReset.setVisibility(View.GONE);
+                // changing stop icon to start icon
+                //     imageViewStartStop.setImageResource(R.drawable.icon_start);
+                // making edit text editable
+                //   editTextMinute.setEnabled(true);
+                // changing the timer status to stopped
+                //   timerStatus = TimerStatus.STOPPED;
+            }
+
+        }.start();
+        countDownTimer.start();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         this.pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         screenOn = this.pm.isScreenOn();
         timerPicker = (Button) findViewById(R.id.timePicker);
+        timerText = (TextView) findViewById(R.id.timerText);
 
         //for blinker
         blinker = (SwitchCompat) findViewById(R.id.blinker);
@@ -170,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         } else {
             getCamera();
         }
-        if (checkVersion() && !hasPermission("android.permission.CAMERA")) {
+      /*  if (checkVersion() && !hasPermission("android.permission.CAMERA")) {
             permissionDialogBox();
         } else {
             if (camera != null) {
@@ -179,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 turnOnLight();
             }
             isTorchOn = false;
-        }
+        }*/
         isOnOFF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -219,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 blickTimeValue = value;
             }
         });
+/*
 
         final ScrollableNumberPicker timerNumberPicker = (ScrollableNumberPicker) findViewById(R.id.number_picker_timer);
         timerNumberPicker.setListener(new ScrollableNumberPickerListener() {
@@ -228,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         });
 
+*/
         //runnable for blinker
         runnableCode = new Runnable() {
             @Override
@@ -256,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         };
         mTimerHandler.post(runnableCode);
+/*
 
         //runnable for timer
         runnableCode1 = new Runnable() {
@@ -270,12 +340,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     time = false;
                     SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                     switchCompat.setChecked(false);
-                    time = false;
                 }
                 mTimerHandler1.postDelayed(runnableCode1, timerTimeValue);
             }
         };
         mTimerHandler1.post(runnableCode1);
+*/
 
         timerPicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -297,8 +367,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     }
 
     private void OpenTimePicker() {
+        DialogFragment newFragment = new PickerDialogFragment();
+        //  newFragment.show(getSupportFragmentManager(), "timePicker");
+        newFragment.show(getFragmentManager(), "dialog");
 
     }
+
 
     private void showNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -347,13 +421,13 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         });
 
-        final ScrollableNumberPicker timerNumberPicker = (ScrollableNumberPicker) findViewById(R.id.number_picker_timer);
+      /*  final ScrollableNumberPicker timerNumberPicker = (ScrollableNumberPicker) findViewById(R.id.number_picker_timer);
         timerNumberPicker.setListener(new ScrollableNumberPickerListener() {
             @Override
             public void onNumberPicked(int value) {
                 timerTimeValue = value * 1000;
             }
-        });
+        });*/
         if (R.id.blinker == buttonView.getId()) {
             if (isChecked) {
                 SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
@@ -372,9 +446,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
         if (R.id.timer == buttonView.getId()) {
             if (isChecked) {
+                startCountDownTimer();
                 SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
                 switchCompat.setChecked(false);
-                time = true;
+                //    time = true;
                 blink = false;
                 if (camera != null) {
                     turnOnFlash();
@@ -385,7 +460,9 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 toast = Toast.makeText(MainActivity.this, "Timer : ON", duration);
                 toast.show();
             } else {
-                time = false;
+                stopCountDownTimer();
+                //  time = false;
+
                 duration = Toast.LENGTH_SHORT;
                 if (camera != null) {
                     turnOffFlash();
