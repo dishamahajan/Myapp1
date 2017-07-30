@@ -47,8 +47,6 @@ import com.michaelmuenzer.android.scrollablennumberpicker.ScrollableNumberPicker
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import yuku.ambilwarna.AmbilWarnaDialog;
@@ -94,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private NotificationManager mNotificationManager;
     private static final int notification_id = 123456;
     private RemoteViews remoteViews;
-    private TextView timerText;
+    //private TextView timerText;
     private Button discoLight;
 
     private String hmsTimeFormatter(long milliSeconds) {
@@ -107,7 +105,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     }
 
     private void stopCountDownTimer() {
-        timerText.setText("");
+        //timerText.setText("");
+        timerPicker.setText("Time Picker");
         countDownTimer.cancel();
     }
 
@@ -121,7 +120,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 } else {
                     turnOnLight();
                 }
-                timerText.setText(hmsTimeFormatter(millisUntilFinished));
+                //timerText.setText(hmsTimeFormatter(millisUntilFinished));
+                timerPicker.setText(hmsTimeFormatter(millisUntilFinished));
             }
 
             @Override
@@ -133,7 +133,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 }
                 SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                 switchCompat.setChecked(false);
-                timerText.setText("");
+                timerPicker.setText("Time Picker");
+                //timerText.setText("");
                 toast = Toast.makeText(MainActivity.this, "Timer : OFF", duration);
                 toast.show();
             }
@@ -147,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         setContentView(R.layout.activity_main);
 
         relativeLayout = (RelativeLayout) findViewById(R.id.main);
-        button = (Button) findViewById(R.id.button);
+        button = (Button) findViewById(R.id.colorPicker);
         discoLight = (Button) findViewById(R.id.discoLight);
         DefaultColor = ContextCompat.getColor(MainActivity.this, R.color.white);
 
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
         isOnOFF = (ImageButton) findViewById(R.id.isOnOFF);
         timerPicker = (Button) findViewById(R.id.timePicker);
-        timerText = (TextView) findViewById(R.id.timerText);
+        //timerText = (TextView) findViewById(R.id.timerText);
 
         //for blinker
         blinker = (SwitchCompat) findViewById(R.id.blinker);
@@ -521,12 +522,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         return chosen;
     }
 
-    private void permissionDialogBox() {
-        String[] perms = {"android.permission.FLASHLIGHT", "android.permission.CAMERA"};
-        int permsRequestCode = 200;
-        requestPermissions(perms, permsRequestCode);
-    }
-
     public void turnOnLight() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -565,6 +560,30 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
     }
 
+    private void turnOnFlash() {
+        if (this.camera == null || this.parameters == null) {
+            return;
+        }
+        this.parameters = camera.getParameters();
+        this.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        this.camera.setParameters(parameters);
+        this.camera.startPreview();
+        isOnOFF.setImageResource(R.drawable.on);
+        isTorchOn = true;
+    }
+
+    private void turnOffFlash() {
+        if (this.camera == null || this.parameters == null) {
+            return;
+        }
+        this.parameters = this.camera.getParameters();
+        this.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        this.camera.setParameters(parameters);
+        this.camera.stopPreview();
+        isOnOFF.setImageResource(R.drawable.off);
+        isTorchOn = false;
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -572,6 +591,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             camera.release();
             camera = null;
         }
+    }
+
+    private void permissionDialogBox() {
+        String[] perms = {"android.permission.FLASHLIGHT", "android.permission.CAMERA"};
+        int permsRequestCode = 200;
+        requestPermissions(perms, permsRequestCode);
     }
 
     @Override
@@ -604,30 +629,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
             }
         }
-    }
-
-    private void turnOnFlash() {
-        if (this.camera == null || this.parameters == null) {
-            return;
-        }
-        this.parameters = camera.getParameters();
-        this.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-        this.camera.setParameters(parameters);
-        this.camera.startPreview();
-        isOnOFF.setImageResource(R.drawable.on);
-        isTorchOn = true;
-    }
-
-    private void turnOffFlash() {
-        if (this.camera == null || this.parameters == null) {
-            return;
-        }
-        this.parameters = this.camera.getParameters();
-        this.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-        this.camera.setParameters(parameters);
-        this.camera.stopPreview();
-        isOnOFF.setImageResource(R.drawable.off);
-        isTorchOn = false;
     }
 }
 
