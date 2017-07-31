@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
     private void stopCountDownTimer() {
         //timerText.setText("");
-        timerPicker.setText("Time Picker");
+        timerPicker.setText("Set Time");
         countDownTimer.cancel();
     }
 
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 }
                 SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                 switchCompat.setChecked(false);
-                timerPicker.setText("Time Picker");
+                timerPicker.setText("Set Time");
                 //timerText.setText("");
                 toast = Toast.makeText(MainActivity.this, "Timer : OFF", duration);
                 toast.show();
@@ -267,7 +267,15 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         discoLight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                discoLightFlag = !discoLightFlag;
+
+                if(discoLightFlag){
+                    discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
+                    discoLightFlag=!discoLightFlag;
+                }else{
+                    discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
+                    discoLightFlag=!discoLightFlag;
+                }
+
                 relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));
             }
         });

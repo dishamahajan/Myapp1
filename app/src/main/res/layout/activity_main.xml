@@ -21,9 +21,9 @@
         android:textSize="19dp"
         android:shadowColor="@color/white"
         android:layout_alignParentTop="true"
-        android:shadowDx="1.5"
-        android:shadowDy="1.3"
-        android:shadowRadius="1.6"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="2"
         android:theme="@style/NewTheme"
         android:background="?attr/selectableItemBackgroundBorderless"
         />
@@ -56,7 +56,7 @@
         android:layout_height="35dp"
         android:gravity="center"
         android:layout_gravity="center"
-        android:text="Time Picker"
+        android:text="Set Time"
         android:textColor="@android:color/white"
         android:layout_marginBottom="14dp"
         android:layout_marginRight="25dp"
@@ -79,9 +79,9 @@
         android:textSize="19dp"
         android:shadowColor="@color/white"
         android:layout_below="@+id/blinker"
-        android:shadowDx="1.5"
-        android:shadowDy="1.3"
-        android:shadowRadius="1.6"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="2"
         android:theme="@style/NewTheme"
         android:background="?attr/selectableItemBackgroundBorderless"
         />
@@ -89,31 +89,31 @@
     <ImageButton
         android:id="@+id/isOnOFF"
         android:padding="20dp"
-        android:layout_below="@+id/timer"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:adjustViewBounds="true"
         android:cropToPadding="false"
         android:duplicateParentState="false"
         android:scaleType="fitCenter"
         android:src="@drawable/off"
-        android:background="?attr/selectableItemBackgroundBorderless"/>
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_below="@+id/timer"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:id="@+id/colorPicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:gravity="center"
         android:layout_gravity="center"
-        android:text="Color Picker"
+        android:background="@drawable/color_picker"
+        android:layout_marginBottom="25dp"
         android:layout_above="@+id/adViewAd"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="21dp"
-        android:layout_marginStart="21dp"
-        android:layout_marginBottom="34dp" />
+        android:layout_marginLeft="25dp"
+       />
 
     <!--<TextView
         android:id="@+id/timerText"
@@ -126,18 +126,15 @@
 
     <Button
         android:id="@+id/discoLight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="center"
-        android:layout_marginBottom="34dp"
-        android:text="Disco Light"
-        android:layout_above="@+id/adViewAd"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="21dp"
-        android:layout_marginEnd="21dp"
-         />
+        android:background="@drawable/disco_off"
+        android:gravity="center"
+        android:layout_marginBottom="25dp"
+        android:layout_alignTop="@+id/colorPicker"
+        android:layout_alignRight="@+id/timePicker"
+        android:layout_alignEnd="@+id/timePicker" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adViewAd"
