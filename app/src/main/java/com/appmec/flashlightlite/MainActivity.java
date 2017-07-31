@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -36,7 +37,6 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -67,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     Boolean screenOn;
     private Handler mTimerHandler = new Handler();
     private Handler mTimerHandler1 = new Handler();
+    private Handler timerHandlerForDiscoLightColor = new Handler();
+    public static final int[] colorArray = {Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE, Color.CYAN, Color.GRAY};
 
     private SwitchCompat blinker;
     private SwitchCompat timer;
@@ -76,16 +78,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private CountDownTimer countDownTimer;
     int blinkTimeValue = 100;
     int discoLightValue = 50;
+    int discoLightColorValue = 50;
     int duration;
     Toast toast;
     public static long timepickerDuration = 30 * 1000;
-    Button button;
+    Button colorPicker;
     RelativeLayout relativeLayout;
     int DefaultColor;
-    int discoLightColor = 1;
     private Runnable runnableCode;
     private Runnable runnableCode1;
-
+    private Runnable runnableForDiscoLightColor;
+    int discoLightColor = 0;
     Button timerPicker;
 
     NotificationCompat.Builder notification;
@@ -115,11 +118,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         countDownTimer = new CountDownTimer(timepickerDuration, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                if (camera != null) {
-                    turnOnFlash();
-                } else {
-                    turnOnLight();
-                }
+                turnOnFlashLight();
                 //timerText.setText(hmsTimeFormatter(millisUntilFinished));
                 timerPicker.setText(hmsTimeFormatter(millisUntilFinished));
             }
@@ -148,11 +147,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         setContentView(R.layout.activity_main);
 
         relativeLayout = (RelativeLayout) findViewById(R.id.main);
-        button = (Button) findViewById(R.id.colorPicker);
+        colorPicker = (Button) findViewById(R.id.colorPicker);
         discoLight = (Button) findViewById(R.id.discoLight);
         DefaultColor = ContextCompat.getColor(MainActivity.this, R.color.white);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        colorPicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 OpenColorPickerDialog(false);
@@ -231,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             isTorchOn = false;
         }
 */
+        isTorchOn = false;
         isOnOFF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -241,19 +241,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         if (isTorchOn) {
                             mNotificationManager.cancel(notification_id);
 
-                            if (camera != null) {
-                                turnOffFlash();
-                            } else {
-                                turnOffLight();
-                            }
-                            isTorchOn = false;
+                            turnOffFlashLight();
                         } else {
                             showNotification();
-                            if (camera != null) {
-                                turnOnFlash();
-                            } else {
-                                turnOnLight();
-                            }
+                            turnOnFlashLight();
                             isTorchOn = true;
                         }
                     }
@@ -271,6 +262,86 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         });
         //runnable for blinker
+        runnableForBlinker();
+
+        discoLight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                discoLightFlag = !discoLightFlag;
+                relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));
+            }
+        });
+        //runnable for discolight
+        runnableForDiscolight();
+
+        timerPicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                OpenTimePicker();
+            }
+        });
+
+        //Admob
+        MobileAds.initialize(this, "ca-app-pub-7860341576927713~5587659182");
+        mAdView = (AdView) findViewById(R.id.adViewAd);
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("D8D6B049EDAB3CB2227DD36B3ED29F2D")
+                .addTestDevice("25F149879ED72631F3CB460DEED0436A")
+                .addTestDevice("B117F7C5611FB5503E6D2BD2CCA8C928")
+                .build();
+        mAdView.loadAd(adRequest);
+
+    }
+
+    private void runnableForDiscolight() {
+        runnableCode1 = new Runnable() {
+            @Override
+            public void run() {
+                if (discoLightFlag) {
+                    if (camera != null) {
+                        turnOnFlash();
+                        try {
+                            Thread.sleep(discoLightValue);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        turnOffFlash();
+                    } else {
+                        turnOnLight();
+                        try {
+                            Thread.sleep(discoLightValue);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        turnOffLight();
+                    }
+                    discoLightValue = discoLightValue + 25;
+                    if (discoLightValue == 250) {
+                        discoLightValue = 25;
+                    }
+                }
+                mTimerHandler1.postDelayed(runnableCode1, discoLightValue);
+            }
+        };
+
+        mTimerHandler1.post(runnableCode1);
+
+        runnableForDiscoLightColor = new Runnable() {
+            @Override
+            public void run() {
+                if (discoLightFlag) {
+                    setRelativeBackground(discoLightColor++);
+                    if (discoLightColor == colorArray.length - 1) {
+                        discoLightColor = 0;
+                    }
+                }
+                timerHandlerForDiscoLightColor.postDelayed(runnableForDiscoLightColor, discoLightColorValue);
+            }
+        };
+        timerHandlerForDiscoLightColor.post(runnableForDiscoLightColor);
+    }
+
+    private void runnableForBlinker() {
         runnableCode = new Runnable() {
             @Override
             public void run() {
@@ -297,72 +368,33 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         };
         mTimerHandler.post(runnableCode);
+    }
 
-        discoLight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                discoLightFlag = !discoLightFlag;
-                relativeLayout.setBackgroundColor(DefaultColor);
-            }
-        });
+    private void turnOnFlashLight() {
+        if (camera != null) {
+            turnOnFlash();
+        } else {
+            turnOnLight();
+        }
+    }
 
-        runnableCode1 = new Runnable() {
-            @Override
-            public void run() {
-                if (discoLightFlag) {
-                    if (camera != null) {
-                        turnOnFlash();
-                        try {
-                            Thread.sleep(discoLightValue);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        turnOffFlash();
-                    } else {
-                        turnOnLight();
-                        try {
-                            Thread.sleep(discoLightValue);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        turnOffLight();
-                    }
-                    discoLightValue = discoLightValue + 50;
-                    if (discoLightValue == 250) {
-                        discoLightValue = 50;
-                    }
-                    relativeLayout.setBackgroundColor(getResources().getColor(R.color.black));
-                    discoLightColor++;
-                    if (discoLightColor == 20) {
-                        discoLightColor = 1;
-                    }
-                }
-                mTimerHandler1.postDelayed(runnableCode1, discoLightValue);
-            }
-        };
-        mTimerHandler1.post(runnableCode1);
-        timerPicker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                OpenTimePicker();
-            }
-        });
-
-        //Admob
-        MobileAds.initialize(this, "ca-app-pub-7860341576927713~5587659182");
-        mAdView = (AdView) findViewById(R.id.adViewAd);
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("D8D6B049EDAB3CB2227DD36B3ED29F2D")
-                .addTestDevice("25F149879ED72631F3CB460DEED0436A")
-                .addTestDevice("B117F7C5611FB5503E6D2BD2CCA8C928")
-                .build();
-        mAdView.loadAd(adRequest);
-
+    private void turnOffFlashLight() {
+        if (camera != null) {
+            turnOffFlash();
+        } else {
+            turnOffLight();
+        }
+        isTorchOn = false;
     }
 
     private void OpenTimePicker() {
         DialogFragment newFragment = new PickerDialogFragment();
         newFragment.show(getFragmentManager(), "dialog");
+    }
+
+    public void setRelativeBackground(int i) {
+        final int color = colorArray[i];
+        relativeLayout.setBackgroundColor(color);
     }
 
     private void showNotification() {
@@ -391,6 +423,9 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             public void onOk(AmbilWarnaDialog ambilWarnaDialog, int color) {
                 DefaultColor = color;
                 relativeLayout.setBackgroundColor(color);
+             /*   Dialog dialog=new Dialog(MainActivity.this,android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                dialog.getWindow().setBackgroundDrawableResource(color);
+                dialog.show();*/
             }
 
             @Override
@@ -434,22 +469,14 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 switchCompat.setChecked(false);
                 //    time = true;
                 blink = false;
-                if (camera != null) {
-                    turnOnFlash();
-                } else {
-                    turnOnLight();
-                }
+                turnOnFlashLight();
                 duration = Toast.LENGTH_SHORT;
                 toast = Toast.makeText(MainActivity.this, "Timer : ON", duration);
                 toast.show();
             } else {
                 stopCountDownTimer();
                 duration = Toast.LENGTH_SHORT;
-                if (camera != null) {
-                    turnOffFlash();
-                } else {
-                    turnOffLight();
-                }
+                turnOffFlashLight();
                 toast = Toast.makeText(MainActivity.this, "Timer : OFF", duration);
                 toast.show();
             }
