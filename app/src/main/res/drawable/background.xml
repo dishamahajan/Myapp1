@@ -1,14 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape>
-            <gradient
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle" >
+    <gradient
+        android:angle="360"
+        android:centerX="50%"
+        android:centerY="50%"
+
+        android:gradientRadius="50%"
+        android:endColor="#d66437"
+        android:centerColor="#fde982"
+        android:startColor="#c65638" >
+    </gradient>
+
+</shape>
+
+<!--<gradient
+android:angle="360"
+android:centerX="50%"
+android:centerY="50%"
+
+android:gradientRadius="50%"
+android:endColor="#d66437"
+android:centerColor="#fde982"
+android:startColor="#d66437" >
+</gradient>-->
+<!--
+<gradient
+        android:centerColor="#d66437"
+        android:endColor="#fde982"
+        android:gradientRadius="500"
+        android:startColor="#c65638"
+        android:type="radial" >
+    </gradient>
+-->
+
+    <!--
+    <selector xmlns:android="http://schemas.android.com/apk/res/android">
+        <item>
+            <shape>
+                <gradient
                 android:angle="90"
-                android:startColor="#7f7f7f"
+                android:startColor="#4b67b8"
                 android:endColor="#ffffff"
-                android:type="linear" />
-        </shape>
-    </item>
-</selector>
+                android:type="linear"
+                />
+            </shape>
+        </item>
+    </selector>
+    -->
 <!-- android:startColor="#f0000000"
                 android:endColor="#ff444444"-->

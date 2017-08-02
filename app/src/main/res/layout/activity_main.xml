@@ -33,22 +33,25 @@
         android:layout_width="100dp"
         android:layout_height="35dp"
         android:background="@drawable/number_picker_bg_color"
-        android:paddingEnd="5dp"
-        android:paddingStart="5dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
         app:snp_maxValue="1000"
         app:snp_minValue="50"
         app:snp_orientation="horizontal"
         app:snp_stepSize="50"
         app:snp_updateInterval="100"
         app:snp_value="100"
+        app:snp_buttonIconLeft="@drawable/left_selector"
+        app:snp_buttonIconRight="@drawable/right_selector"
+        app:snp_buttonBackgroundTintSelector="@color/white"
+        app:snp_buttonPaddingBottom="8dp"
+        app:snp_buttonPaddingTop="8dp"
         android:layout_marginBottom="14dp"
         android:layout_marginRight="25dp"
         android:layout_marginEnd="25dp"
         android:layout_above="@+id/timer"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        app:snp_value_text_color="#cccccc"
+        />
 
     <Button
         android:id="@+id/timePicker"
@@ -57,6 +60,7 @@
         android:gravity="center"
         android:layout_gravity="center"
         android:text="Set Time"
+        android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:layout_marginBottom="14dp"
         android:layout_marginRight="25dp"
@@ -65,7 +69,8 @@
         android:layout_alignBaseline="@+id/timer"
         android:layout_alignBottom="@+id/timer"
         android:layout_alignLeft="@+id/number_picker_blinker"
-        android:layout_alignStart="@+id/number_picker_blinker" />
+        android:layout_alignStart="@+id/number_picker_blinker"
+        />
 
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/timer"
@@ -98,7 +103,7 @@
         android:scaleType="fitCenter"
         android:src="@drawable/off"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:layout_below="@+id/timer"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
     <Button

@@ -275,7 +275,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
                     discoLightFlag=!discoLightFlag;
                 }
-
                 relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));
             }
         });
@@ -397,6 +396,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
     private void OpenTimePicker() {
         DialogFragment newFragment = new PickerDialogFragment();
+        newFragment.setStyle(2,1);
         newFragment.show(getFragmentManager(), "dialog");
     }
 
