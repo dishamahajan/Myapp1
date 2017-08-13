@@ -222,9 +222,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 if(discoLightFlag){
                     discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
                     discoLightFlag=!discoLightFlag;
+                    showToast("Disco Light: OFF");
                 }else{
                     discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
                     discoLightFlag=!discoLightFlag;
+                    showToast("Disco Light: ON");
                 }
                 relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));
             }
@@ -421,8 +423,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                 switchCompat.setChecked(false);
                 timerPicker.setText("Set Time");
-                toast = Toast.makeText(MainActivity.this, "Timer : OFF", duration);
-                toast.show();
+                showToast("Timer : OFF");
             }
         }.start();
         countDownTimer.start();
@@ -445,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
             @Override
             public void onCancel(AmbilWarnaDialog ambilWarnaDialog) {
-                Toast.makeText(MainActivity.this, "Color Picker Closed", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Color Picker Closed", Toast.LENGTH_SHORT).show();
             }
         });
         ambilWarnaDialog.show();
@@ -467,20 +468,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 blink = true;
                 time = false;
                 duration = Toast.LENGTH_SHORT;
-                toast = Toast.makeText(MainActivity.this, "Blinker : ON", duration);
-                toast.show();
+                showToast("Blinker : ON");
             } else {
                 blink = false;
                 duration = Toast.LENGTH_SHORT;
-                toast = Toast.makeText(MainActivity.this, "Blinker : OFF", duration);
-                toast.show();
+                showToast("Blinker : OFF");
             }
         }
         if (R.id.timer == buttonView.getId()) {
             if (isChecked) {
                 if(timepickerDuration==0){
-                    toast = Toast.makeText(MainActivity.this, "Set Time", duration);
-                    toast.show();
+                    showToast("Set Time");
                     timer.setChecked(false);
                 }else{
                     startCountDownTimer();
@@ -490,18 +488,25 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     turnOnFlashLight();
                     showNotification();
                     duration = Toast.LENGTH_SHORT;
-                    toast = Toast.makeText(MainActivity.this, "Timer : ON", duration);
-                    toast.show();
+                    showToast("Timer : ON");
                 }
             } else {
                 stopCountDownTimer();
                 mNotificationManager.cancel(notification_id);
                 duration = Toast.LENGTH_SHORT;
                 turnOffFlashLight();
-                toast = Toast.makeText(MainActivity.this, "Timer : OFF", duration);
-                toast.show();
+                showToast("Timer : OFF");
             }
         }
+    }
+
+    private void showToast(String msg) {
+        if(toast != null)
+        {
+            toast.cancel();
+        }
+        toast = Toast.makeText(MainActivity.this, msg, duration);
+        toast.show();
     }
 
     private void showNotification() {
