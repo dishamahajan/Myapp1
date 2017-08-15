@@ -183,13 +183,22 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 try {
                     if (checkVersion() && !hasPermission("android.permission.CAMERA")) {
                         permissionDialogBox();
-                    } else {
+                    } else if(blink){
+                        showToast("Blinker is ON! Switch Off Blinker to turn Flash ON!");
+                    }else if(time){
+                        showToast("Timer is ON! Switch Off Timer to turn Flash ON!");
+                    }else if(discoLightFlag){
+                        showToast("Disco is ON! Switch Off Disco Light to turn Flash ON!");
+                    }else
+                        {
                         if (isTorchOn) {
                             mNotificationManager.cancel(notification_id);
                             turnOffFlashLight();
+                            isOnOFF.setImageResource(R.drawable.off);
                         } else {
                             showNotification("turnOff");
                             turnOnFlashLight();
+                            isOnOFF.setImageResource(R.drawable.on);
                         }
                     }
                 } catch (Exception e) {
@@ -218,16 +227,21 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         discoLight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(discoLightFlag){
-                    discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
-                    discoLightFlag=!discoLightFlag;
-                    showToast("Disco Light: OFF");
-                }else{
-                    discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
-                    discoLightFlag=!discoLightFlag;
-                    showToast("Disco Light: ON");
+                if(isTorchOn){
+                    showToast("Switch Off Flash to turn Disco Light ON!");
                 }
-                relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));
+                else{
+                    if(discoLightFlag){
+                        discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
+                        discoLightFlag=!discoLightFlag;
+                        showToast("Disco Light: OFF");
+                    }else{
+                        discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
+                        discoLightFlag=!discoLightFlag;
+                        showToast("Disco Light: ON");
+                    }
+                    /*relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));*/
+                }
             }
         });
 
@@ -251,10 +265,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             {
                 extras = null;
                 turnOffFlashLight();
-            }else if(extras.getBoolean("turnOnTimer")){
-                extras = null;
-                /*timer.setChecked(true);
-                startCountDownTimer();*/
             }
         }
 
@@ -349,12 +359,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 objCameraManager.setTorchMode(mCameraId, true);
-                isOnOFF.setImageResource(R.drawable.on);
             } else {
                 try {
                     builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
                     session.setRepeatingRequest(builder.build(), null, null);
-                    isOnOFF.setImageResource(R.drawable.on);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -368,12 +376,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 objCameraManager.setTorchMode(mCameraId, false);
-                isOnOFF.setImageResource(R.drawable.off);
             } else {
                 try {
                     builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
                     session.setRepeatingRequest(builder.build(), null, null);
-                    isOnOFF.setImageResource(R.drawable.off);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -391,7 +397,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         this.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         this.camera.setParameters(parameters);
         this.camera.startPreview();
-        isOnOFF.setImageResource(R.drawable.on);
         isTorchOn = true;
     }
 
@@ -403,7 +408,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         this.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         this.camera.setParameters(parameters);
         this.camera.stopPreview();
-        isOnOFF.setImageResource(R.drawable.off);
         isTorchOn = false;
     }
 
@@ -427,7 +431,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         countDownTimer = new CountDownTimer(timepickerDuration, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-
                 if(!isTorchOn) {
                     turnOnFlashLight();
                 }
@@ -480,12 +483,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         });
         if (R.id.blinker == buttonView.getId()) {
             if (isChecked) {
-                SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
-                switchCompat.setChecked(false);
-                blink = true;
-                time = false;
-                duration = Toast.LENGTH_SHORT;
-                showToast("Blinker : ON");
+                if(isTorchOn){
+                    showToast("Flash is On! Switch Off Flash to turn Blinker ON!");
+                    blinker.setChecked(false);
+                }else{
+                    SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
+                    switchCompat.setChecked(false);
+                    blink = true;
+                    time = false;
+                    duration = Toast.LENGTH_SHORT;
+                    showToast("Blinker : ON");
+                }
             } else {
                 blink = false;
                 duration = Toast.LENGTH_SHORT;
@@ -498,19 +506,24 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     showToast("Set Time");
                     timer.setChecked(false);
                 }else{
-                    time = true;
-                    startCountDownTimer();
-                    SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
-                    switchCompat.setChecked(false);
-                    blink = false;
-                    turnOnFlashLight();
-                    showNotification("turnOnTimer");
-                    duration = Toast.LENGTH_SHORT;
-                    showToast("Timer : ON");
+                    if(isTorchOn){
+                        showToast("Flash is On! Switch Off Flash to turn Timer ON!");
+                        timer.setChecked(false);
+                    }else{
+                        time = true;
+                        startCountDownTimer();
+                        SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
+                        switchCompat.setChecked(false);
+                        blink = false;
+                        turnOnFlashLight();
+                        /*showNotification("turnOnTimer");*/
+                        duration = Toast.LENGTH_SHORT;
+                        showToast("Timer : ON");
+                    }
                 }
             } else {
                 stopCountDownTimer();
-                mNotificationManager.cancel(notification_id);
+                //mNotificationManager.cancel(notification_id);
                 duration = Toast.LENGTH_SHORT;
                 turnOffFlashLight();
                 showToast("Timer : OFF");
@@ -541,10 +554,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         if(from=="turnOff") {
             notification.setContentText("Flash is ON! Click to turn it OFF!");
             intent.putExtra("turnOff", true);
-        }
-        else if(from=="turnOnTimer") {
-            notification.setContentText("Timer is ON!");
-            intent.putExtra("turnOnTimer", true);
         }
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notification.setContentIntent(pendingIntent);
@@ -657,7 +666,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         if (camera != null) {
             camera.release();
             camera = null;
-            mNotificationManager.cancel(notification_id);
         }
     }
 
