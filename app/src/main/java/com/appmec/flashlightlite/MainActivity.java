@@ -188,9 +188,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                             mNotificationManager.cancel(notification_id);
                             turnOffFlashLight();
                         } else {
-                            showNotification();
+                            showNotification("turnOff");
                             turnOnFlashLight();
-                            isTorchOn = true;
                         }
                     }
                 } catch (Exception e) {
@@ -242,6 +241,22 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
         runnableForBlinker();
         runnableForTimerAndDiscolight();
+
+        if (savedInstanceState == null) {
+            Bundle extras = getIntent().getExtras();
+            if(extras == null)
+            {
+                //Cry about not being clicked on
+            }else if (extras.getBoolean("turnOff"))
+            {
+                extras = null;
+                turnOffFlashLight();
+            }else if(extras.getBoolean("turnOnTimer")){
+                extras = null;
+                /*timer.setChecked(true);
+                startCountDownTimer();*/
+            }
+        }
 
         //Admob
         MobileAds.initialize(this, "ca-app-pub-7860341576927713~5587659182");
@@ -318,6 +333,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         } else {
             turnOnLight();
         }
+        isTorchOn = true;
     }
 
     private void turnOffFlashLight() {
@@ -403,6 +419,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
     private void stopCountDownTimer() {
         timerPicker.setText("Set Time");
+        time = false;
         countDownTimer.cancel();
     }
 
@@ -481,12 +498,13 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     showToast("Set Time");
                     timer.setChecked(false);
                 }else{
+                    time = true;
                     startCountDownTimer();
                     SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
                     switchCompat.setChecked(false);
                     blink = false;
                     turnOnFlashLight();
-                    showNotification();
+                    showNotification("turnOnTimer");
                     duration = Toast.LENGTH_SHORT;
                     showToast("Timer : ON");
                 }
@@ -509,7 +527,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         toast.show();
     }
 
-    private void showNotification() {
+    private void showNotification(String from) {
+        int int_condition=0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notification.setSmallIcon(R.drawable.notification_icon);
         } else {
@@ -518,12 +537,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         notification.setTicker("Flash is ON!");
         notification.setWhen(System.currentTimeMillis());
         notification.setContentTitle("Flashlight Lite");
-        notification.setContentText("Flash is ON! Click to turn it OFF!");
-
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        if(from=="turnOff") {
+            notification.setContentText("Flash is ON! Click to turn it OFF!");
+            intent.putExtra("turnOff", true);
+        }
+        else if(from=="turnOnTimer") {
+            notification.setContentText("Timer is ON!");
+            intent.putExtra("turnOnTimer", true);
+        }
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notification.setContentIntent(pendingIntent);
-
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotificationManager.notify(notification_id, notification.build());
     }
@@ -633,6 +657,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         if (camera != null) {
             camera.release();
             camera = null;
+            mNotificationManager.cancel(notification_id);
         }
     }
 
