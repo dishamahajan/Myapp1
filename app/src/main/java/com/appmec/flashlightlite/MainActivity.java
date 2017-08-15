@@ -241,8 +241,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
                         discoLightFlag=!discoLightFlag;
                         showToast("Disco Light: OFF");
+                        mNotificationManager.cancel(notification_id);
                     }else{
                         discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
+                        showNotification("discoison");
                         discoLightFlag=!discoLightFlag;
                         showToast("Disco Light: ON");
                     }
@@ -266,10 +268,9 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             Bundle extras = getIntent().getExtras();
             if(extras == null)
             {
-                //Cry about not being clicked on
+
             }else if (extras.getBoolean("turnOff"))
             {
-                extras = null;
                 turnOffFlashLight();
             }
         }
@@ -496,6 +497,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     time = false;
                     duration = Toast.LENGTH_SHORT;
                     showToast("Blinker : ON");
+                    showNotification("blinkerison");
                 } else if(isTorchOn){
                     showToast("Flash is On! Switch Off Flash to turn Blinker ON!");
                     blinker.setChecked(false);
@@ -509,11 +511,13 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     time = false;
                     duration = Toast.LENGTH_SHORT;
                     showToast("Blinker : ON");
+                    showNotification("blinkerison");
                 }
             } else {
                 blink = false;
                 duration = Toast.LENGTH_SHORT;
                 showToast("Blinker : OFF");
+                mNotificationManager.cancel(notification_id);
             }
         }
         if (R.id.timer == buttonView.getId()) {
@@ -535,14 +539,14 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         switchCompat.setChecked(false);
                         blink = false;
                         turnOnFlashLight();
-                        /*showNotification("turnOnTimer");*/
+                        showNotification("timerison");
                         duration = Toast.LENGTH_SHORT;
                         showToast("Timer : ON");
                     }
                 }
             } else {
                 stopCountDownTimer();
-                //mNotificationManager.cancel(notification_id);
+                mNotificationManager.cancel(notification_id);
                 duration = Toast.LENGTH_SHORT;
                 turnOffFlashLight();
                 showToast("Timer : OFF");
@@ -568,14 +572,33 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
         notification.setTicker("Flash is ON!");
         notification.setWhen(System.currentTimeMillis());
-        notification.setContentTitle("Flashlight Lite");
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         if(from=="turnOff") {
-            notification.setContentText("Flash is ON! Click to turn it OFF!");
+            notification.setContentTitle("Flash is ON!");
+            notification.setContentText("Tap to turn it OFF!");
             intent.putExtra("turnOff", true);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            notification.setContentIntent(pendingIntent);
+            notification.setOngoing(true);
+        }else if(from=="blinkerison") {
+            notification.setContentTitle("Blinker");
+            notification.setContentText("Blinker is ON!");
+            notification.setOngoing(true);
+            intent = null;
+            notification.setContentIntent(null);
+        }else if(from=="timerison") {
+            notification.setContentTitle("Timer");
+            notification.setContentText("Timer is ON!");
+            notification.setOngoing(true);
+            intent = null;
+            notification.setContentIntent(null);
+        }else if(from=="discoison") {
+            notification.setContentTitle("Disco Light");
+            notification.setContentText("Disco Light is ON!");
+            notification.setOngoing(true);
+            intent = null;
+            notification.setContentIntent(null);
         }
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        notification.setContentIntent(pendingIntent);
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotificationManager.notify(notification_id, notification.build());
     }
@@ -686,6 +709,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             camera.release();
             camera = null;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mNotificationManager.cancel(notification_id);
     }
 
     private void getCamera() {
