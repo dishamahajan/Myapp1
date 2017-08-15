@@ -41,4 +41,5 @@ dependencies {
     compile 'com.michaelmuenzer.android:ScrollableNumberPicker:0.2.2'
     compile 'com.github.yukuku:ambilwarna:2.0.1'
     compile 'mobi.upod:time-duration-picker:1.1.1'
+    compile 'com.kovachcode:timePickerWithSeconds:1.0.1'
 }

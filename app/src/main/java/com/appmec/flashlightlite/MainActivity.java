@@ -40,10 +40,13 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.ikovac.timepickerwithseconds.MyTimePickerDialog;
+import com.ikovac.timepickerwithseconds.TimePicker;
 import com.michaelmuenzer.android.scrollablennumberpicker.ScrollableNumberPicker;
 import com.michaelmuenzer.android.scrollablennumberpicker.ScrollableNumberPickerListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -220,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             @Override
             public void onClick(View view) {
                 OpenTimePicker();
+
             }
         });
 
@@ -457,9 +461,32 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     }
 
     private void OpenTimePicker() {
-        DialogFragment newFragment = new PickerDialogFragment();
-        /*newFragment.setStyle(2,1);*/
-        newFragment.show(getFragmentManager(), "dialog");
+        /*DialogFragment newFragment = new PickerDialogFragment();
+        newFragment.setStyle(2,1);
+        newFragment.show(getFragmentManager(), "dialog");*/
+        Calendar now = Calendar.getInstance();
+        MyTimePickerDialog mTimePicker = new MyTimePickerDialog(this, new MyTimePickerDialog.OnTimeSetListener() {
+
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute, int seconds) {
+                // TODO Auto-generated method stub
+                timerPicker.setText( String.format("%02d", hourOfDay)+
+                        ":" + String.format("%02d", minute) +
+                        ":" + String.format("%02d", seconds));
+                String a[];
+                a=timerPicker.getText().toString().split(":");
+                int hour = Integer.parseInt(a[0]);
+                int min = Integer.parseInt(a[1]);
+                int sec = Integer.parseInt(a[2]);
+
+                timepickerDuration =(hour*3600000)+(min*60000)+(sec*1000);
+            }
+
+        },0,0,10, true);
+
+        mTimePicker.show();
+
+
     }
 
     private void OpenColorPickerDialog(boolean AlphaSupport) {
@@ -711,11 +738,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
     }
 
-    @Override
+    /*@Override
     protected void onDestroy() {
         super.onDestroy();
         mNotificationManager.cancel(notification_id);
-    }
+    }*/
 
     private void getCamera() {
         if (this.camera == null) {
