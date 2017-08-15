@@ -227,7 +227,13 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         discoLight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isTorchOn){
+                if(blink){
+                    showToast("Switch Off Blinker to turn Disco Light ON!");
+                }
+                else if(time){
+                    showToast("Switch Off Timer to turn Disco Light ON!");
+                }
+                else if(isTorchOn){
                     showToast("Switch Off Flash to turn Disco Light ON!");
                 }
                 else{
@@ -451,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
     private void OpenTimePicker() {
         DialogFragment newFragment = new PickerDialogFragment();
-        newFragment.setStyle(2,1);
+        /*newFragment.setStyle(2,1);*/
         newFragment.show(getFragmentManager(), "dialog");
     }
 
@@ -483,8 +489,18 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         });
         if (R.id.blinker == buttonView.getId()) {
             if (isChecked) {
-                if(isTorchOn){
+                if(time){
+                    SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
+                    switchCompat.setChecked(false);
+                    blink = true;
+                    time = false;
+                    duration = Toast.LENGTH_SHORT;
+                    showToast("Blinker : ON");
+                } else if(isTorchOn){
                     showToast("Flash is On! Switch Off Flash to turn Blinker ON!");
+                    blinker.setChecked(false);
+                }else if(discoLightFlag){
+                    showToast("Disco is On! Switch Off Disco Light to turn Blinker ON!");
                     blinker.setChecked(false);
                 }else{
                     SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
@@ -508,6 +524,9 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 }else{
                     if(isTorchOn){
                         showToast("Flash is On! Switch Off Flash to turn Timer ON!");
+                        timer.setChecked(false);
+                    }else if(discoLightFlag){
+                        showToast("Disco is On! Switch Off Disco Light to turn Timer ON!");
                         timer.setChecked(false);
                     }else{
                         time = true;
