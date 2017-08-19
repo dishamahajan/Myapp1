@@ -119,14 +119,17 @@
         android:layout_alignParentStart="true"
         android:layout_marginLeft="25dp"
        />
-
-    <!--<TextView
-        android:id="@+id/timerText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/colorPicker"
-        android:layout_marginBottom="10dp"
+    <!--<Button
+        android:id="@+id/sos"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:background="@drawable/color_picker"
+        android:layout_marginBottom="25dp"
+        android:layout_above="@+id/adViewAd"
+        android:layout_alignLeft="@+id/colorPicker"
+        android:layout_marginLeft="120dp"
         />-->
 
     <Button

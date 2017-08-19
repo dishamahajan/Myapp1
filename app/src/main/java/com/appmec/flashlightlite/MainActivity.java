@@ -1,12 +1,16 @@
 package com.appmec.flashlightlite;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.SurfaceTexture;
@@ -22,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -68,8 +73,9 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     Camera.Parameters parameters;
 
     private Handler mTimerHandler = new Handler();
-    private Handler mTimerHandler1 = new Handler();
+    private Handler mTimerHandlerForDiscoLightBlinker = new Handler();
     private Handler timerHandlerForDiscoLightColor = new Handler();
+    private Handler timerHandlerForSos = new Handler();
 
     public static final int[] colorArray = {Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.DKGRAY, Color.BLACK, Color.LTGRAY};
 
@@ -83,9 +89,13 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private CountDownTimer countDownTimer;
     public static long timepickerDuration = 30 * 1000;
     private Runnable runnableCode1Timer;
-    Button timerPicker;
 
+    Button timerPicker;
     Button colorPicker;
+
+    Button sos;
+    private Runnable runnableCodeSos;
+    boolean sosFlag = false;
 
     boolean discoLightFlag = false;
     int discoLightValue = 50;
@@ -129,6 +139,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
         //Disco Light
         discoLight = (Button) findViewById(R.id.discoLight);
+
+       /* sos = (Button) findViewById(R.id.sos);*/
         DefaultColor = ContextCompat.getColor(MainActivity.this, R.color.white);
 
         //for notification
@@ -257,6 +269,23 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         });
 
+        //Listener for SOS
+     /*   sos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(sosFlag){
+                    discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
+                    sosFlag=!sosFlag;
+                    showToast("SOS: OFF");
+                }else{
+                    discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
+                    sosFlag=!sosFlag;
+                    showToast("SOS: ON");
+                }
+                relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));
+            }
+        });
+*/
         //Listener for Colorpicker
         colorPicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -267,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
         runnableForBlinker();
         runnableForTimerAndDiscolight();
+       // runnableForSos();
 
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
@@ -286,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 .addTestDevice("D8D6B049EDAB3CB2227DD36B3ED29F2D")
                 .addTestDevice("25F149879ED72631F3CB460DEED0436A")
                 .addTestDevice("B117F7C5611FB5503E6D2BD2CCA8C928")
+                .addTestDevice("5FBF995F76CDF38832A294D8A2EE7DD0")
                 .build();
         mAdView.loadAd(adRequest);
 
@@ -310,6 +341,25 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         mTimerHandler.post(runnableCodeBlinker);
     }
 
+    private void runnableForSos() {
+        runnableCodeSos = new Runnable() {
+            @Override
+            public void run() {
+                if (sosFlag) {
+                    turnOnFlashLight();
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    turnOffFlashLight();
+                }
+                timerHandlerForSos.postDelayed(runnableCodeSos, 500);
+            }
+        };
+        timerHandlerForSos.post(runnableCodeSos);
+    }
+
     private void runnableForTimerAndDiscolight() {
         runnableCode1Timer = new Runnable() {
             @Override
@@ -327,11 +377,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         discoLightValue = 25;
                     }
                 }
-                mTimerHandler1.postDelayed(runnableCode1Timer, discoLightValue);
+                mTimerHandlerForDiscoLightBlinker.postDelayed(runnableCode1Timer, discoLightValue);
             }
         };
 
-        mTimerHandler1.post(runnableCode1Timer);
+        mTimerHandlerForDiscoLightBlinker.post(runnableCode1Timer);
 
         runnableForDiscoLightColor = new Runnable() {
             @Override
@@ -366,6 +416,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         isTorchOn = false;
     }
 
+    @TargetApi(21)
     public void turnOnLight() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -383,6 +434,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
     }
 
+    @TargetApi(21)
     public void turnOffLight() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -442,10 +494,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         countDownTimer = new CountDownTimer(timepickerDuration, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                if(!isTorchOn) {
-                    turnOnFlashLight();
+                if(time) {
+                    if (!isTorchOn) {
+                        turnOnFlashLight();
+                    }
+                    timerPicker.setText(hmsTimeFormatter(millisUntilFinished));
                 }
-                timerPicker.setText(hmsTimeFormatter(millisUntilFinished));
             }
 
             @Override
@@ -455,6 +509,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 switchCompat.setChecked(false);
                 timerPicker.setText("Set Time");
                 showToast("Timer : OFF");
+                time = false;
             }
         }.start();
         countDownTimer.start();
@@ -590,44 +645,59 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         toast.show();
     }
 
-    private void showNotification(String from) {
-        int int_condition=0;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notification.setSmallIcon(R.drawable.notification_icon);
-        } else {
-            notification.setSmallIcon(R.drawable.ic_launcher);
-        }
-        notification.setTicker("Flash is ON!");
-        notification.setWhen(System.currentTimeMillis());
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        if(from=="turnOff") {
-            notification.setContentTitle("Flash is ON!");
-            notification.setContentText("Tap to turn it OFF!");
-            intent.putExtra("turnOff", true);
-            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            notification.setContentIntent(pendingIntent);
-            notification.setOngoing(true);
-        }else if(from=="blinkerison") {
-            notification.setContentTitle("Blinker");
-            notification.setContentText("Blinker is ON!");
-            notification.setOngoing(true);
-            intent = null;
-            notification.setContentIntent(null);
-        }else if(from=="timerison") {
-            notification.setContentTitle("Timer");
-            notification.setContentText("Timer is ON!");
-            notification.setOngoing(true);
-            intent = null;
-            notification.setContentIntent(null);
-        }else if(from=="discoison") {
-            notification.setContentTitle("Disco Light");
-            notification.setContentText("Disco Light is ON!");
-            notification.setOngoing(true);
-            intent = null;
-            notification.setContentIntent(null);
-        }
-        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotificationManager.notify(notification_id, notification.build());
+    private void showNotification(final String from) {
+        ServiceConnection mConnection = new ServiceConnection() {
+            public void onServiceConnected(ComponentName className,
+                                           IBinder binder) {
+                ((MyService.KillBinder) binder).service.startService(new Intent(
+                        MainActivity.this, MyService.class));
+                int int_condition=0;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    notification.setSmallIcon(R.drawable.notification_icon);
+                } else {
+                    notification.setSmallIcon(R.drawable.ic_launcher);
+                }
+                notification.setTicker("Flash is ON!");
+                notification.setWhen(System.currentTimeMillis());
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                if(from=="turnOff") {
+                    notification.setContentTitle("Flash is ON!");
+                    notification.setContentText("Tap to turn it OFF!");
+                    intent.putExtra("turnOff", true);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    notification.setContentIntent(pendingIntent);
+                    notification.setOngoing(true);
+                }else if(from=="blinkerison") {
+                    notification.setContentTitle("Blinker");
+                    notification.setContentText("Blinker is ON!");
+                    notification.setOngoing(true);
+                    intent = null;
+                    notification.setContentIntent(null);
+                }else if(from=="timerison") {
+                    notification.setContentTitle("Timer");
+                    notification.setContentText("Timer is ON!");
+                    notification.setOngoing(true);
+                    intent = null;
+                    notification.setContentIntent(null);
+                }else if(from=="discoison") {
+                    notification.setContentTitle("Disco Light");
+                    notification.setContentText("Disco Light is ON!");
+                    notification.setOngoing(true);
+                    intent = null;
+                    notification.setContentIntent(null);
+                }
+                mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                mNotificationManager.notify(MyService.NOTIFICATION_ID, notification.build());
+
+            }
+
+            public void onServiceDisconnected(ComponentName className) {
+            }
+
+        };
+        bindService(new Intent(MainActivity.this,
+                        MyService.class), mConnection,
+                Context.BIND_AUTO_CREATE);
     }
 
     public void setRelativeBackground(int i) {
@@ -635,6 +705,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         relativeLayout.setBackgroundColor(color);
     }
 
+    @TargetApi(23)
     private void permissionDialogBox() {
         String[] perms = {"android.permission.FLASHLIGHT", "android.permission.CAMERA"};
         int permsRequestCode = 200;
@@ -651,6 +722,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
     }
 
+    @TargetApi(23)
     private boolean hasPermission(String permission) {
         if (checkVersion()) {
             return (checkSelfPermission(permission)) == PackageManager.PERMISSION_GRANTED;
@@ -662,7 +734,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
     }
 
-
+    @TargetApi(21)
     class CameraDeviceStateCallback extends CameraDevice.StateCallback {
         @Override
         public void onOpened(CameraDevice camera) {
@@ -695,6 +767,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
     }
 
+    @TargetApi(21)
     class CameraCaptureSessionStateCallback extends CameraCaptureSession.StateCallback {
         @Override
         public void onConfigured(CameraCaptureSession session) {
@@ -712,6 +785,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
     }
 
+    @TargetApi(21)
     private Size getSmallestSize(String cameraId) throws CameraAccessException {
         Size[] outputSizes = objCameraManager.getCameraCharacteristics(cameraId)
                 .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
@@ -732,10 +806,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     @Override
     protected void onStop() {
         super.onStop();
-        if (camera != null) {
-            camera.release();
-            camera = null;
-        }
     }
 
     /*@Override
@@ -754,5 +824,36 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         }
     }
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure want to exit?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        discoLightFlag = false;
+                        blink = false;
+                        time = false;
+                        turnOffFlashLight();
+                        if (camera != null) {
+                            camera.release();
+                            camera = null;
+                        }
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.addCategory(Intent.CATEGORY_HOME);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
+                }).setNegativeButton("No", null).show();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+
 }
 
