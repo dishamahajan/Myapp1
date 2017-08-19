@@ -9,9 +9,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PaintDrawable;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -112,11 +117,20 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private NotificationManager mNotificationManager;
     private static final int notification_id = 123456;
 
+    public static final String PREFS_NAME = "FlashlightLiteFile";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         relativeLayout = (RelativeLayout) findViewById(R.id.main);
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        int color = settings.getInt("bg_Color", 0);
+        if(color!=0){
+            /*Drawable a = getDrawable(color);*/
+            relativeLayout.setBackgroundColor(color);
+        }
 
         isOnOFF = (ImageButton) findViewById(R.id.isOnOFF);
         timerPicker = (Button) findViewById(R.id.timePicker);
@@ -813,6 +827,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     @Override
     protected void onStop() {
         super.onStop();
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        int color = Color.WHITE;
+        Drawable background = relativeLayout.getBackground();
+        if (background instanceof ColorDrawable)
+            color = ((ColorDrawable) background).getColor();
+
+        editor.putInt("bg_Color",color);
+        // Commit the edits!
+        editor.commit();
     }
 
     /*@Override
