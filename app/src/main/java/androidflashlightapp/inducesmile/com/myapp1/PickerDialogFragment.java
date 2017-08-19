@@ -1,4 +1,4 @@
-package com.appmec.flashlightlite;
+package androidflashlightapp.inducesmile.com.myapp1;
 
 import mobi.upod.timedurationpicker.TimeDurationPicker;
 import mobi.upod.timedurationpicker.TimeDurationPickerDialogFragment;
