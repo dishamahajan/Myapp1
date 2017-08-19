@@ -519,6 +519,16 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         /*DialogFragment newFragment = new PickerDialogFragment();
         newFragment.setStyle(2,1);
         newFragment.show(getFragmentManager(), "dialog");*/
+        String format = String.format("%02d:%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(timepickerDuration),
+                TimeUnit.MILLISECONDS.toMinutes(timepickerDuration) -
+                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(timepickerDuration)), // The change is in this line
+                TimeUnit.MILLISECONDS.toSeconds(timepickerDuration) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timepickerDuration)));
+        String formated[] = format.split(":");
+        int hr = Integer.parseInt(formated[0]);
+        int mn = Integer.parseInt(formated[1]);
+        int sc = Integer.parseInt(formated[2]);
         Calendar now = Calendar.getInstance();
         MyTimePickerDialog mTimePicker = new MyTimePickerDialog(this, new MyTimePickerDialog.OnTimeSetListener() {
 
@@ -537,11 +547,9 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 timepickerDuration =(hour*3600000)+(min*60000)+(sec*1000);
             }
 
-        },0,0,10, true);
+        },hr,mn,sc, true);
 
         mTimePicker.show();
-
-
     }
 
     private void OpenColorPickerDialog(boolean AlphaSupport) {
