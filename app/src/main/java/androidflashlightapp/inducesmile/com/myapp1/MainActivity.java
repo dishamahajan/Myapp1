@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     Button sos;
     private Runnable runnableCodeSos;
     boolean sosFlag = false;
+    int sosblinktime = 100;
 
     boolean discoLightFlag = false;
     int discoLightValue = 50;
@@ -151,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         //Disco Light
         discoLight = (Button) findViewById(R.id.discoLight);
 
-       /* sos = (Button) findViewById(R.id.sos);*/
+        sos = (Button) findViewById(R.id.sos);
         DefaultColor = ContextCompat.getColor(MainActivity.this, R.color.white);
 
         //for notification
@@ -281,22 +282,18 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         });
 
         //Listener for SOS
-     /*   sos.setOnClickListener(new View.OnClickListener() {
+        sos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(sosFlag){
-                    discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
                     sosFlag=!sosFlag;
                     showToast("SOS: OFF");
                 }else{
-                    discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
                     sosFlag=!sosFlag;
                     showToast("SOS: ON");
                 }
-                relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));
             }
         });
-*/
         //Listener for Colorpicker
         colorPicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -307,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
         runnableForBlinker();
         runnableForTimerAndDiscolight();
-       // runnableForSos();
+        runnableForSos();
 
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
@@ -351,21 +348,33 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         };
         mTimerHandler.post(runnableCodeBlinker);
     }
-
+    int i =0;
     private void runnableForSos() {
+        final String[] sosCode = {".",".",".","_","_","_",".",".","."};
+
         runnableCodeSos = new Runnable() {
             @Override
             public void run() {
                 if (sosFlag) {
+                     String sosCode1 = sosCode[i++];
+                    if(i== sosCode.length){
+                        i = 0;
+                    }
                     turnOnFlashLight();
                     try {
-                        Thread.sleep(500);
+                        if (sosCode[i].equals("_")) {
+                            Thread.sleep(550);
+                            sosblinktime = 550;
+                        } else {
+                            Thread.sleep(100);
+                            sosblinktime = 100;
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     turnOffFlashLight();
-                }
-                timerHandlerForSos.postDelayed(runnableCodeSos, 500);
+         }
+                timerHandlerForSos.postDelayed(runnableCodeSos, sosblinktime);
             }
         };
         timerHandlerForSos.post(runnableCodeSos);
@@ -821,7 +830,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     @Override
     protected void onStop() {
         super.onStop();
-
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         int color = Color.WHITE;

@@ -119,7 +119,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginLeft="25dp"
        />
-    <!--<Button
+    <Button
         android:id="@+id/sos"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -130,7 +130,7 @@
         android:layout_above="@+id/adViewAd"
         android:layout_alignLeft="@+id/colorPicker"
         android:layout_marginLeft="120dp"
-        />-->
+        />
 
     <Button
         android:id="@+id/discoLight"
