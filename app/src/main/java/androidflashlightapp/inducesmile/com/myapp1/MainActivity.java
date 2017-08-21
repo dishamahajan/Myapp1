@@ -832,6 +832,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         editor.putInt("bg_Color",color);
         // Commit the edits!
         editor.commit();
+        if(camera!=null){
+            camera.release();
+            camera=null;
+        }
     }
 
     /*@Override
