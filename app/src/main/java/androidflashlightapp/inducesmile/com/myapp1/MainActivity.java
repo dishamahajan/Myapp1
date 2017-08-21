@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private Button discoLight;
 
     Toast toast;
-    int duration;
 
     RelativeLayout relativeLayout;
     int DefaultColor;
@@ -598,44 +597,41 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     switchCompat.setChecked(false);
                     blink = true;
                     time = false;
-                    duration = Toast.LENGTH_SHORT;
                     showToast("Blinker : ON");
                     showNotification("blinkerison");
                 } else if(isTorchOn){
                     showToast("Flash is On! Switch Off Flash to turn Blinker ON!");
                     blinker.setChecked(false);
-                }else if(discoLightFlag){
+                } else if(discoLightFlag){
                     showToast("Disco is On! Switch Off Disco Light to turn Blinker ON!");
                     blinker.setChecked(false);
-                }else{
+                } else{
                     SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                     switchCompat.setChecked(false);
                     blink = true;
                     time = false;
-                    duration = Toast.LENGTH_SHORT;
                     showToast("Blinker : ON");
                     showNotification("blinkerison");
                 }
             } else {
                 blink = false;
-                duration = Toast.LENGTH_SHORT;
                 showToast("Blinker : OFF");
                 mNotificationManager.cancel(notification_id);
             }
         }
         if (R.id.timer == buttonView.getId()) {
             if (isChecked) {
-                if(timepickerDuration==0){
+                if (timepickerDuration==0){
                     showToast("Set Time");
                     timer.setChecked(false);
                 }else{
                     if(isTorchOn){
                         showToast("Flash is On! Switch Off Flash to turn Timer ON!");
                         timer.setChecked(false);
-                    }else if(discoLightFlag){
+                    } else if(discoLightFlag){
                         showToast("Disco is On! Switch Off Disco Light to turn Timer ON!");
                         timer.setChecked(false);
-                    }else{
+                    } else{
                         time = true;
                         startCountDownTimer();
                         SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
@@ -643,14 +639,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         blink = false;
                         turnOnFlashLight();
                         showNotification("timerison");
-                        duration = Toast.LENGTH_SHORT;
                         showToast("Timer : ON");
                     }
                 }
             } else {
                 stopCountDownTimer();
                 mNotificationManager.cancel(notification_id);
-                duration = Toast.LENGTH_SHORT;
                 turnOffFlashLight();
                 showToast("Timer : OFF");
             }
@@ -662,7 +656,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         {
             toast.cancel();
         }
-        toast = Toast.makeText(MainActivity.this, msg, duration);
+        toast = Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT);
         toast.show();
     }
 
@@ -859,7 +853,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
-                .setMessage("Are you sure want to exit?")
+                .setMessage("Are you sure you want to exit?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -877,6 +871,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         finish();
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        System.exit(1);
                     }
                 }).setNegativeButton("No", null).show();
     }
