@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private Handler mTimerHandlerForDiscoLightBlinker = new Handler();
     private Handler timerHandlerForDiscoLightColor = new Handler();
     private Handler timerHandlerForSos = new Handler();
+    private Handler timerHandlerForMorseCode = new Handler();
 
     public static final int[] colorArray = {Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.DKGRAY, Color.BLACK, Color.LTGRAY};
 
@@ -100,6 +101,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private Runnable runnableCodeSos;
     boolean sosFlag = false;
     int sosblinktime = 100;
+
+    Button morseCode;
+    private Runnable runnableCodeMorseCode;
+    boolean morseFlag = false;
+    int morseblinktime = 100;
 
     boolean discoLightFlag = false;
     int discoLightValue = 50;
@@ -153,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         discoLight = (Button) findViewById(R.id.discoLight);
 
         sos = (Button) findViewById(R.id.sos);
+        morseCode = (Button) findViewById(R.id.morseCode);
         DefaultColor = ContextCompat.getColor(MainActivity.this, R.color.white);
 
         //for notification
@@ -216,6 +223,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         showToast("Timer is ON! Switch Off Timer to turn Flash ON!");
                     }else if(discoLightFlag){
                         showToast("Disco is ON! Switch Off Disco Light to turn Flash ON!");
+                    }else if(sosFlag){
+                        showToast("Sos is ON! Switch Off Sos to turn Flash ON!");
+                    }else if(morseFlag){
+                        showToast("Morse code flash is ON! Switch Off morse to turn Flash ON!");
                     }else
                         {
                         if (isTorchOn) {
@@ -294,6 +305,21 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 }
             }
         });
+
+        //Listener for SOS
+        morseCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(morseFlag){
+                    morseFlag=!morseFlag;
+                    showToast("Morse: OFF");
+                }else{
+                    morseFlag=!morseFlag;
+                    showToast("Morse: ON");
+                }
+            }
+        });
+
         //Listener for Colorpicker
         colorPicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -305,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         runnableForBlinker();
         runnableForTimerAndDiscolight();
         runnableForSos();
-
+        runnableForMorse(MorseCode.alphaToMorse("Disha"));
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras == null)
@@ -378,6 +404,37 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         };
         timerHandlerForSos.post(runnableCodeSos);
+    }
+
+    private void runnableForMorse(String morseCode) {
+        final char[] sosCode = morseCode.toCharArray();
+
+        runnableCodeMorseCode = new Runnable() {
+            @Override
+            public void run() {
+                if (morseFlag) {
+                    char sosCode1 = sosCode[i++];
+                    if(i== sosCode.length){
+                        i = 0;
+                    }
+                    turnOnFlashLight();
+                    try {
+                        if (sosCode[i] == '-') {
+                            Thread.sleep(550);
+                            morseblinktime = 550;
+                        } else {
+                            Thread.sleep(100);
+                            morseblinktime = 100;
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    turnOffFlashLight();
+                }
+                timerHandlerForMorseCode.postDelayed(runnableCodeMorseCode, morseblinktime);
+            }
+        };
+        timerHandlerForMorseCode.post(runnableCodeMorseCode);
     }
 
     private void runnableForTimerAndDiscolight() {
