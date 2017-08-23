@@ -2,6 +2,7 @@ package androidflashlightapp.inducesmile.com.myapp1;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -42,7 +43,9 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -303,6 +306,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     sosFlag=!sosFlag;
                     showToast("SOS: ON");
                 }
+
             }
         });
 
@@ -310,13 +314,27 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         morseCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(morseFlag){
+                /*if(morseFlag){
                     morseFlag=!morseFlag;
                     showToast("Morse: OFF");
                 }else{
                     morseFlag=!morseFlag;
                     showToast("Morse: ON");
-                }
+                }*/
+                final Dialog dialog = new Dialog(MainActivity.this);
+                // Include dialog.xml file
+                dialog.setContentView(R.layout.customdialog);
+                // Set dialog title
+                dialog.setTitle("Custom Dialog");
+
+                // set values for custom dialog components - text, image and button
+                TextView text = (TextView) dialog.findViewById(R.id.textDialog);
+                text.setText("Custom dialog Android example.");
+                ImageView image = (ImageView) dialog.findViewById(R.id.imageDialog);
+                image.setImageResource(R.drawable.background);
+
+                dialog.show();
+
             }
         });
 
