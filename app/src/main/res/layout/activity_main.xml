@@ -108,8 +108,8 @@
 
     <Button
         android:id="@+id/colorPicker"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:gravity="center"
         android:layout_gravity="center"
         android:background="@drawable/color_picker"
@@ -117,36 +117,36 @@
         android:layout_above="@+id/adViewAd"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="25dp"
-       />
+        android:layout_marginLeft="25dp"/>
+
     <Button
         android:id="@+id/sos"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:layout_gravity="center"
-        android:background="@drawable/color_picker"
+        android:background="@drawable/sos_off"
         android:layout_marginBottom="25dp"
         android:layout_above="@+id/adViewAd"
         android:layout_alignLeft="@+id/colorPicker"
-        android:layout_marginLeft="100dp"
+        android:layout_marginLeft="87dp"
         />
 
     <Button
         android:id="@+id/morseCode"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:layout_gravity="center"
-        android:background="@drawable/color_picker"
+        android:background="@drawable/morse_off"
         android:layout_marginBottom="25dp"
         android:layout_above="@+id/adViewAd"
-        android:layout_alignLeft="@+id/sos"
-        android:layout_marginLeft="100dp"
+        android:layout_alignRight="@+id/discoLight"
+        android:layout_marginRight="87dp"
         />
 
     <Button
         android:id="@+id/discoLight"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:layout_gravity="center"
         android:background="@drawable/disco_off"
         android:gravity="center"
@@ -156,10 +156,10 @@
         android:layout_alignEnd="@+id/timePicker" />
 
     <com.google.android.gms.ads.AdView
+        ads:adSize="BANNER"
         android:id="@+id/adViewAd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        ads:adSize="BANNER"
         ads:adUnitId="ca-app-pub-7860341576927713/9599056385"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"

@@ -297,23 +297,27 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             @Override
             public void onClick(View v) {
                 if(sosFlag){
+                    sos.setBackground(getResources().getDrawable(R.drawable.sos_off));
                     sosFlag=!sosFlag;
                     showToast("SOS: OFF");
                 }else{
+                    sos.setBackground(getResources().getDrawable(R.drawable.sos_on));
                     sosFlag=!sosFlag;
                     showToast("SOS: ON");
                 }
             }
         });
 
-        //Listener for SOS
+        //Listener for MorseCode
         morseCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(morseFlag){
+                    morseCode.setBackground(getResources().getDrawable(R.drawable.morse_off));
                     morseFlag=!morseFlag;
                     showToast("Morse: OFF");
                 }else{
+                    morseCode.setBackground(getResources().getDrawable(R.drawable.morse_on));
                     morseFlag=!morseFlag;
                     showToast("Morse: ON");
                 }
