@@ -36,6 +36,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Size;
+import android.view.Gravity;
 import android.view.Surface;
 import android.view.View;
 import android.widget.Button;
@@ -130,6 +131,10 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         relativeLayout = (RelativeLayout) findViewById(R.id.main);
+
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.ic_action_name);
+        getSupportActionBar().setLogo(R.drawable.ic_action_name);
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         int color = settings.getInt("bg_Color", 0);
@@ -727,6 +732,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             toast.cancel();
         }
         toast = Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 350);
         toast.show();
     }
 
