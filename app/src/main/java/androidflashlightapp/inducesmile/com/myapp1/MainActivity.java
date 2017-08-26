@@ -232,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     } else if (sosFlag) {
                         showToast("Sos is ON! Switch Off Sos to turn Flash ON!");
                     } else if (morseFlag) {
-                        showToast("Morse code flash is ON! Switch Off morse to turn Flash ON!");
+                        showToast("Morse code is ON! Switch Off morse to turn Flash ON!");
                     } else {
                         if (isTorchOn) {
                             mNotificationManager.cancel(notification_id);
@@ -277,7 +277,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     showToast("Switch Off Timer to turn Disco Light ON!");
                 } else if (isTorchOn) {
                     showToast("Switch Off Flash to turn Disco Light ON!");
-                } else {
+                } else if (sosFlag) {
+                    showToast("Sos is ON! Switch Off Sos to turn Disco Light ON!");
+                } else if (morseFlag) {
+                    showToast("Morse code flash is ON! Switch Off morse to turn Disco Light ON!");
+                }else {
                     if (discoLightFlag) {
                         discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
                         discoLightFlag = !discoLightFlag;
@@ -298,7 +302,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         sos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (sosFlag) {
+                if (blink) {
+                    showToast("Switch Off Blinker to turn SOS ON!");
+                } else if (time) {
+                    showToast("Switch Off Timer to turn SOS ON!");
+                } else if (isTorchOn) {
+                    showToast("Switch Off Flash to turn SOS ON!");
+                } else if (discoLightFlag) {
+                    showToast("Disco light is ON! Switch Off Disco Light to turn SOS ON!");
+                } else if (morseFlag) {
+                    showToast("Morse code is ON! Switch Off morse to turn SOS ON!");
+                } else if (sosFlag) {
                     sos.setBackground(getResources().getDrawable(R.drawable.sos_off));
                     sosFlag = !sosFlag;
                     showToast("SOS: OFF");
@@ -315,41 +329,52 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         morseCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                final Dialog dialog = new Dialog(MainActivity.this);
-                dialog.setContentView(R.layout.customdialog);
-                Window window = dialog.getWindow();
-                final TextView insertText = (TextView) dialog.findViewById(R.id.insertText);
-                final TextView insertText1 = (TextView) dialog.findViewById(R.id.insertText1);
-                Button transmit = (Button) dialog.findViewById(R.id.transmit);
-                Button morseButton = (Button) dialog.findViewById(R.id.submitButton);
-                transmit.setOnClickListener(new View.OnClickListener() {
+                if (blink) {
+                    showToast("Switch Off Blinker to turn Morse ON!");
+                } else if (time) {
+                    showToast("Switch Off Timer to turn Morse ON!");
+                } else if (isTorchOn) {
+                    showToast("Switch Off Flash to turn Morse ON!");
+                } else if (sosFlag) {
+                    showToast("Sos is ON! Switch Off Sos to turn Morse ON!");
+                } else if (discoLightFlag) {
+                    showToast("Disco light is ON! Switch Off Disco Light to turn Morse ON!");
+                }else {
+                    final Dialog dialog = new Dialog(MainActivity.this);
+                    dialog.setContentView(R.layout.customdialog);
+                    Window window = dialog.getWindow();
+                    final TextView insertText = (TextView) dialog.findViewById(R.id.insertText);
+                    final TextView insertText1 = (TextView) dialog.findViewById(R.id.insertText1);
+                    Button transmit = (Button) dialog.findViewById(R.id.transmit);
+                    Button morseButton = (Button) dialog.findViewById(R.id.submitButton);
+                    transmit.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        insertText1.setText(MorseCode.alphaToMorse(insertText.getText().toString()));
+                                                        morseCodeText = (MorseCode.alphaToMorse(insertText.getText().toString())).trim();
+                                                    }
+                                                }
+                    );
+                    morseButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            insertText1.setText(MorseCode.alphaToMorse(insertText.getText().toString()));
-                            morseCodeText = (MorseCode.alphaToMorse(insertText.getText().toString())).trim();
+                            if (!insertText1.getText().toString().trim().equals("")) {
+                                morseCode.setBackground(getResources().getDrawable(R.drawable.morse_on));
+                                morseFlag = !morseFlag;
+                                showToast("Morse: ON");
+                                dialog.dismiss();
+                            }
                         }
+                    });
+                    if (morseFlag) {
+                        morseCode.setBackground(getResources().getDrawable(R.drawable.morse_off));
+                        morseFlag = !morseFlag;
+                        morseCodeText = "";
+                        i = 0;
+                        showToast("Morse: OFF");
+                    } else {
+                        dialog.show();
                     }
-                );
-                morseButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if(!insertText1.getText().toString().trim().equals("")) {
-                            morseCode.setBackground(getResources().getDrawable(R.drawable.morse_on));
-                            morseFlag = !morseFlag;
-                            showToast("Morse: ON");
-                            dialog.dismiss();
-                        }
-                    }
-                });
-                if (morseFlag) {
-                    morseCode.setBackground(getResources().getDrawable(R.drawable.morse_off));
-                    morseFlag = !morseFlag;
-                    morseCodeText ="";
-                    i=0;
-                    showToast("Morse: OFF");
-                }else {
-                    dialog.show();
                 }
             }
         });
@@ -707,6 +732,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 } else if (discoLightFlag) {
                     showToast("Disco is On! Switch Off Disco Light to turn Blinker ON!");
                     blinker.setChecked(false);
+                } else if (sosFlag) {
+                    showToast("SOS is On! Switch Off SOS to turn Blinker ON!");
+                    blinker.setChecked(false);
+                } else if (morseFlag) {
+                    showToast("Morse is On! Switch Off Morse Light to turn Blinker ON!");
+                    blinker.setChecked(false);
                 } else {
                     SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                     switchCompat.setChecked(false);
@@ -733,6 +764,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     } else if (discoLightFlag) {
                         showToast("Disco is On! Switch Off Disco Light to turn Timer ON!");
                         timer.setChecked(false);
+                    } else if (sosFlag) {
+                        showToast("SOS is On! Switch Off SOS to turn Timer ON!");
+                        blinker.setChecked(false);
+                    } else if (morseFlag) {
+                        showToast("Morse is On! Switch Off Morse Light to turn Timer ON!");
+                        blinker.setChecked(false);
                     } else {
                         time = true;
                         startCountDownTimer();
