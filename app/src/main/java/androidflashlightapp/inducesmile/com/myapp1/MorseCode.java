@@ -27,16 +27,15 @@ public class MorseCode {
     }
 
     public static String alphaToMorse(String englishCode) {
+        englishCode = englishCode.replace("\n", "").replace("\r", "");
         StringBuilder builder = new StringBuilder();
         String[] words = englishCode.trim().split(" ");
 
         for (String word : words) {
             for (int i = 0; i < word.length(); i++) {
                 String morse = ALPHA_TO_MORSE.get(word.substring(i, i + 1).toLowerCase());
-                builder.append(morse).append(" ");
+                builder.append(morse);
             }
-
-            builder.append("  ");
         }
 
         return builder.toString();

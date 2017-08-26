@@ -327,14 +327,14 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         @Override
                         public void onClick(View v) {
                             insertText1.setText(MorseCode.alphaToMorse(insertText.getText().toString()));
-                            morseCodeText = MorseCode.alphaToMorse(insertText.getText().toString());
+                            morseCodeText = (MorseCode.alphaToMorse(insertText.getText().toString())).trim();
                         }
                     }
                 );
                 morseButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(!insertText1.getText().equals("")) {
+                        if(!insertText1.getText().toString().trim().equals("")) {
                             morseCode.setBackground(getResources().getDrawable(R.drawable.morse_on));
                             morseFlag = !morseFlag;
                             showToast("Morse: ON");
