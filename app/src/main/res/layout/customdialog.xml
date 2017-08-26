@@ -11,6 +11,8 @@ android:background="@drawable/dialogboxbackground"
         android:layout_height="wrap_content"
         android:text="Enter your text"
         android:textSize="16dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
@@ -29,6 +31,7 @@ android:background="@drawable/dialogboxbackground"
         android:layout_marginRight="15dp"
         android:paddingBottom="15dp"
         android:background="@drawable/edittextbackground"
+        android:textCursorDrawable = "@null"
         />
 
     <TextView
@@ -37,9 +40,12 @@ android:background="@drawable/dialogboxbackground"
         android:layout_height="wrap_content"
         android:text="Morse Code"
         android:textSize="16dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
+        android:layout_marginTop="15dp"
         android:layout_below="@+id/insertText"/>
 
 
