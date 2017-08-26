@@ -1,30 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="fill_parent"
-android:layout_height="fill_parent" >
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+>
 
-<ImageView
-    android:id="@+id/imageDialog"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginRight="6dp" />
+    <TextView
+        android:id="@+id/editText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter your text"
+        android:textSize="12dp"
+        android:layout_centerHorizontal = "true"
+        android:layout_alignParentTop="true"/>
 
-<TextView
-    android:id="@+id/textDialog"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:textColor="#FFF"
-    android:layout_toRightOf="@+id/imageDialog"/>
+    <EditText
+        android:id="@+id/insertText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:inputType="textMultiLine"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/editText"
+        android:scrollbarThumbVertical="@dimen/activity_horizontal_margin"
+         />
 
-<Button
-    android:id="@+id/declineButton"
-    android:layout_width="100px"
-    android:layout_height="wrap_content"
-    android:text=" Submit "
-    android:layout_marginTop="5dp"
-    android:layout_marginRight="5dp"
-    android:layout_below="@+id/textDialog"
-    android:layout_toRightOf="@+id/imageDialog"
-    />
+    <TextView
+        android:id="@+id/editText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Morse Code"
+        android:textSize="12dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/insertText"/>
+
+
+    <EditText
+        android:id="@+id/insertText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:inputType="textMultiLine"
+        android:layout_marginTop="16dp"
+        android:scrollHorizontally="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/editText1"
+        android:clickable="false"
+        android:scrollbarThumbVertical="@dimen/activity_vertical_margin"
+        />
+
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" Submit "
+        android:layout_marginLeft="48dp"
+        android:layout_marginStart="48dp"
+        android:layout_alignBottom="@+id/transmit"
+     />
+
+    <Button
+        android:id="@+id/transmit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transmit"
+        android:layout_marginRight="36dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginTop="98dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+
 
 </RelativeLayout>

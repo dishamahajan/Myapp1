@@ -13,11 +13,9 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.PaintDrawable;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -40,11 +38,11 @@ import android.util.Size;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -110,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private Runnable runnableCodeMorseCode;
     boolean morseFlag = false;
     int morseblinktime = 100;
-
+    String morseCodeText = "";
     boolean discoLightFlag = false;
     int discoLightValue = 50;
     int discoLightColorValue = 50;
@@ -141,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         int color = settings.getInt("bg_Color", 0);
-        if(color!=0){
+        if (color != 0) {
             /*Drawable a = getDrawable(color);*/
             relativeLayout.setBackgroundColor(color);
         }
@@ -225,18 +223,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 try {
                     if (checkVersion() && !hasPermission("android.permission.CAMERA")) {
                         permissionDialogBox();
-                    } else if(blink){
+                    } else if (blink) {
                         showToast("Blinker is ON! Switch Off Blinker to turn Flash ON!");
-                    }else if(time){
+                    } else if (time) {
                         showToast("Timer is ON! Switch Off Timer to turn Flash ON!");
-                    }else if(discoLightFlag){
+                    } else if (discoLightFlag) {
                         showToast("Disco is ON! Switch Off Disco Light to turn Flash ON!");
-                    }else if(sosFlag){
+                    } else if (sosFlag) {
                         showToast("Sos is ON! Switch Off Sos to turn Flash ON!");
-                    }else if(morseFlag){
+                    } else if (morseFlag) {
                         showToast("Morse code flash is ON! Switch Off morse to turn Flash ON!");
-                    }else
-                        {
+                    } else {
                         if (isTorchOn) {
                             mNotificationManager.cancel(notification_id);
                             turnOffFlashLight();
@@ -274,25 +271,22 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         discoLight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(blink){
+                if (blink) {
                     showToast("Switch Off Blinker to turn Disco Light ON!");
-                }
-                else if(time){
+                } else if (time) {
                     showToast("Switch Off Timer to turn Disco Light ON!");
-                }
-                else if(isTorchOn){
+                } else if (isTorchOn) {
                     showToast("Switch Off Flash to turn Disco Light ON!");
-                }
-                else{
-                    if(discoLightFlag){
+                } else {
+                    if (discoLightFlag) {
                         discoLight.setBackground(getResources().getDrawable(R.drawable.disco_off));
-                        discoLightFlag=!discoLightFlag;
+                        discoLightFlag = !discoLightFlag;
                         showToast("Disco Light: OFF");
                         mNotificationManager.cancel(notification_id);
-                    }else{
+                    } else {
                         discoLight.setBackground(getResources().getDrawable(R.drawable.disco_on));
                         showNotification("discoison");
-                        discoLightFlag=!discoLightFlag;
+                        discoLightFlag = !discoLightFlag;
                         showToast("Disco Light: ON");
                     }
                     /*relativeLayout.setBackground(getResources().getDrawable(R.drawable.background));*/
@@ -304,13 +298,13 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         sos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(sosFlag){
+                if (sosFlag) {
                     sos.setBackground(getResources().getDrawable(R.drawable.sos_off));
-                    sosFlag=!sosFlag;
+                    sosFlag = !sosFlag;
                     showToast("SOS: OFF");
-                }else{
+                } else {
                     sos.setBackground(getResources().getDrawable(R.drawable.sos_on));
-                    sosFlag=!sosFlag;
+                    sosFlag = !sosFlag;
                     showToast("SOS: ON");
                 }
 
@@ -321,29 +315,42 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         morseCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               /* if(morseFlag){
-                    morseCode.setBackground(getResources().getDrawable(R.drawable.morse_off));
-                    morseFlag=!morseFlag;
-                    showToast("Morse: OFF");
-                }else{
-                    morseCode.setBackground(getResources().getDrawable(R.drawable.morse_on));
-                    morseFlag=!morseFlag;
-                    showToast("Morse: ON");
-                }*/
+
                 final Dialog dialog = new Dialog(MainActivity.this);
-                // Include dialog.xml file
                 dialog.setContentView(R.layout.customdialog);
-                // Set dialog title
-                dialog.setTitle("Custom Dialog");
-
-                // set values for custom dialog components - text, image and button
-                TextView text = (TextView) dialog.findViewById(R.id.textDialog);
-                text.setText("Custom dialog Android example.");
-                ImageView image = (ImageView) dialog.findViewById(R.id.imageDialog);
-                image.setImageResource(R.drawable.background);
-
-                dialog.show();
-
+                Window window = dialog.getWindow();
+                final TextView insertText = (TextView) dialog.findViewById(R.id.insertText);
+                final TextView insertText1 = (TextView) dialog.findViewById(R.id.insertText1);
+                Button transmit = (Button) dialog.findViewById(R.id.transmit);
+                Button morseButton = (Button) dialog.findViewById(R.id.submitButton);
+                transmit.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            insertText1.setText(MorseCode.alphaToMorse(insertText.getText().toString()));
+                            morseCodeText = MorseCode.alphaToMorse(insertText.getText().toString());
+                        }
+                    }
+                );
+                morseButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(!insertText1.getText().equals("")) {
+                            morseCode.setBackground(getResources().getDrawable(R.drawable.morse_on));
+                            morseFlag = !morseFlag;
+                            showToast("Morse: ON");
+                            dialog.dismiss();
+                        }
+                    }
+                });
+                if (morseFlag) {
+                    morseCode.setBackground(getResources().getDrawable(R.drawable.morse_off));
+                    morseFlag = !morseFlag;
+                    morseCodeText ="";
+                    i=0;
+                    showToast("Morse: OFF");
+                }else {
+                    dialog.show();
+                }
             }
         });
 
@@ -358,14 +365,13 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         runnableForBlinker();
         runnableForTimerAndDiscolight();
         runnableForSos();
-        runnableForMorse(MorseCode.alphaToMorse("Disha"));
+        runnableForMorse();
+
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
-            if(extras == null)
-            {
+            if (extras == null) {
 
-            }else if (extras.getBoolean("turnOff"))
-            {
+            } else if (extras.getBoolean("turnOff")) {
                 turnOffFlashLight();
             }
         }
@@ -401,16 +407,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         };
         mTimerHandler.post(runnableCodeBlinker);
     }
-    int i =0;
+
+    int i = 0;
+
     private void runnableForSos() {
-        final String[] sosCode = {".",".",".","_","_","_",".",".","."};
+        final String[] sosCode = {".", ".", ".", "_", "_", "_", ".", ".", "."};
 
         runnableCodeSos = new Runnable() {
             @Override
             public void run() {
                 if (sosFlag) {
-                     String sosCode1 = sosCode[i++];
-                    if(i== sosCode.length){
+                    if (i == sosCode.length) {
                         i = 0;
                     }
                     turnOnFlashLight();
@@ -426,29 +433,29 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         e.printStackTrace();
                     }
                     turnOffFlashLight();
-         }
+
+                    i++;
+                }
                 timerHandlerForSos.postDelayed(runnableCodeSos, sosblinktime);
             }
         };
         timerHandlerForSos.post(runnableCodeSos);
     }
 
-    private void runnableForMorse(String morseCode) {
-        final char[] sosCode = morseCode.toCharArray();
-
+    private void runnableForMorse() {
         runnableCodeMorseCode = new Runnable() {
             @Override
             public void run() {
+                char[] sosCode = morseCodeText.toCharArray();
                 if (morseFlag) {
-                    char sosCode1 = sosCode[i++];
-                    if(i== sosCode.length){
+                    if (i == sosCode.length) {
                         i = 0;
                     }
                     turnOnFlashLight();
                     try {
                         if (sosCode[i] == '-') {
                             Thread.sleep(550);
-                            morseblinktime = 550;
+                             morseblinktime = 550;
                         } else {
                             Thread.sleep(100);
                             morseblinktime = 100;
@@ -457,6 +464,8 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                         e.printStackTrace();
                     }
                     turnOffFlashLight();
+
+                    i++;
                 }
                 timerHandlerForMorseCode.postDelayed(runnableCodeMorseCode, morseblinktime);
             }
@@ -598,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         countDownTimer = new CountDownTimer(timepickerDuration, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                if(time) {
+                if (time) {
                     if (!isTorchOn) {
                         turnOnFlashLight();
                     }
@@ -639,18 +648,18 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute, int seconds) {
                 // TODO Auto-generated method stub
-                timerPicker.setText( String.format("%02d", hourOfDay)+
+                timerPicker.setText(String.format("%02d", hourOfDay) +
                         ":" + String.format("%02d", minute) +
                         ":" + String.format("%02d", seconds));
                 String a[];
-                a=timerPicker.getText().toString().split(":");
+                a = timerPicker.getText().toString().split(":");
                 int hour = Integer.parseInt(a[0]);
                 int min = Integer.parseInt(a[1]);
                 int sec = Integer.parseInt(a[2]);
 
-                timepickerDuration =(hour*3600000)+(min*60000)+(sec*1000);
+                timepickerDuration = (hour * 3600000) + (min * 60000) + (sec * 1000);
             }
-        },hr,mn,sc, true);
+        }, hr, mn, sc, true);
 
         mTimePicker.show();
 
@@ -685,20 +694,20 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         });
         if (R.id.blinker == buttonView.getId()) {
             if (isChecked) {
-                if(time){
+                if (time) {
                     SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                     switchCompat.setChecked(false);
                     blink = true;
                     time = false;
                     showToast("Blinker : ON");
                     showNotification("blinkerison");
-                } else if(isTorchOn){
+                } else if (isTorchOn) {
                     showToast("Flash is On! Switch Off Flash to turn Blinker ON!");
                     blinker.setChecked(false);
-                } else if(discoLightFlag){
+                } else if (discoLightFlag) {
                     showToast("Disco is On! Switch Off Disco Light to turn Blinker ON!");
                     blinker.setChecked(false);
-                } else{
+                } else {
                     SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.timer);
                     switchCompat.setChecked(false);
                     blink = true;
@@ -714,17 +723,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         }
         if (R.id.timer == buttonView.getId()) {
             if (isChecked) {
-                if (timepickerDuration==0){
+                if (timepickerDuration == 0) {
                     showToast("Set Time");
                     timer.setChecked(false);
-                }else{
-                    if(isTorchOn){
+                } else {
+                    if (isTorchOn) {
                         showToast("Flash is On! Switch Off Flash to turn Timer ON!");
                         timer.setChecked(false);
-                    } else if(discoLightFlag){
+                    } else if (discoLightFlag) {
                         showToast("Disco is On! Switch Off Disco Light to turn Timer ON!");
                         timer.setChecked(false);
-                    } else{
+                    } else {
                         time = true;
                         startCountDownTimer();
                         SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.blinker);
@@ -745,8 +754,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     }
 
     private void showToast(String msg) {
-        if(toast != null)
-        {
+        if (toast != null) {
             toast.cancel();
         }
         toast = Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT);
@@ -760,7 +768,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                                            IBinder binder) {
                 ((MyService.KillBinder) binder).service.startService(new Intent(
                         MainActivity.this, MyService.class));
-                int int_condition=0;
+                int int_condition = 0;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     notification.setSmallIcon(R.drawable.notification_icon);
                 } else {
@@ -769,26 +777,26 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 notification.setTicker("Flash is ON!");
                 notification.setWhen(System.currentTimeMillis());
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                if(from=="turnOff") {
+                if (from == "turnOff") {
                     notification.setContentTitle("Flash is ON!");
                     notification.setContentText("Tap to turn it OFF!");
                     intent.putExtra("turnOff", true);
                     PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     notification.setContentIntent(pendingIntent);
                     notification.setOngoing(true);
-                }else if(from=="blinkerison") {
+                } else if (from == "blinkerison") {
                     notification.setContentTitle("Blinker");
                     notification.setContentText("Blinker is ON!");
                     notification.setOngoing(true);
                     intent = null;
                     notification.setContentIntent(null);
-                }else if(from=="timerison") {
+                } else if (from == "timerison") {
                     notification.setContentTitle("Timer");
                     notification.setContentText("Timer is ON!");
                     notification.setOngoing(true);
                     intent = null;
                     notification.setContentIntent(null);
-                }else if(from=="discoison") {
+                } else if (from == "discoison") {
                     notification.setContentTitle("Disco Light");
                     notification.setContentText("Disco Light is ON!");
                     notification.setOngoing(true);
@@ -922,12 +930,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
         if (background instanceof ColorDrawable)
             color = ((ColorDrawable) background).getColor();
 
-        editor.putInt("bg_Color",color);
+        editor.putInt("bg_Color", color);
         // Commit the edits!
         editor.commit();
-        if(camera!=null){
+        if (camera != null) {
             camera.release();
-            camera=null;
+            camera = null;
         }
     }
 
@@ -947,6 +955,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             }
         }
     }
+
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
