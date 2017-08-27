@@ -36,6 +36,8 @@ import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Size;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
 import android.view.Window;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private Boolean isTorchOn;
 
     private AdView mAdView;
-
+    private Menu menu;
     private Camera camera;
     private CameraDevice cameraDevice;
     private CameraCaptureSession session;
@@ -127,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
     public static final String PREFS_NAME = "FlashlightLiteFile";
 
+    public boolean soundFlag = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             /*Drawable a = getDrawable(color);*/
             relativeLayout.setBackgroundColor(color);
         }
+        soundFlag = settings.getBoolean("sound", true);
 
         isOnOFF = (ImageButton) findViewById(R.id.isOnOFF);
         timerPicker = (Button) findViewById(R.id.timePicker);
@@ -787,6 +791,45 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 turnOffFlashLight();
                 showToast("Timer : OFF");
             }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
+        /*if (soundFlag) {
+            menu.getItem(0).setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode));
+        } else {
+            menu.getItem(0).setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode_off));
+        }*/
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.share:
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                String shareBodyText = "https://play.google.com/store/apps/details?id=androidflashlightapp.inducesmile.com.myapp1";
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBodyText);
+                startActivity(Intent.createChooser(sharingIntent, "Shearing Option"));
+                return true;
+            case R.id.mute:
+                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("sound",!soundFlag);
+                if(soundFlag) {
+                    item.setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode_off));
+                    soundFlag = !soundFlag;
+                }else{
+                    item.setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode));
+                    soundFlag = !soundFlag;
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
