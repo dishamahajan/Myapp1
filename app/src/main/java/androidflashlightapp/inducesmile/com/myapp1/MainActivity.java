@@ -24,6 +24,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -37,6 +38,7 @@ import android.support.v7.widget.SwitchCompat;
 import android.util.Size;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
@@ -130,11 +132,13 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     public static final String PREFS_NAME = "FlashlightLiteFile";
 
     public boolean soundFlag = false;
+    MediaPlayer mp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         relativeLayout = (RelativeLayout) findViewById(R.id.main);
+        mp = MediaPlayer.create(this, R.raw.soho);
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.ic_action_name);
@@ -146,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             /*Drawable a = getDrawable(color);*/
             relativeLayout.setBackgroundColor(color);
         }
-        soundFlag = settings.getBoolean("sound", true);
 
         isOnOFF = (ImageButton) findViewById(R.id.isOnOFF);
         timerPicker = (Button) findViewById(R.id.timePicker);
@@ -238,6 +241,14 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                     } else if (morseFlag) {
                         showToast("Morse code is ON! Switch Off morse to turn Flash ON!");
                     } else {
+                        if(!soundFlag) {
+                            if (mp.isPlaying()) {
+                                mp.stop();
+                                mp.release();
+                                mp = MediaPlayer.create(MainActivity.this, R.raw.soho);
+                            }
+                            mp.start();
+                        }
                         if (isTorchOn) {
                             mNotificationManager.cancel(notification_id);
                             turnOffFlashLight();
@@ -796,16 +807,28 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        this.menu = menu;
-        /*if (soundFlag) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        soundFlag = settings.getBoolean("sound", false);
+        if (soundFlag) {
             menu.getItem(0).setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode));
         } else {
             menu.getItem(0).setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode_off));
-        }*/
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        }
+
         return true;
     }
+/*
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
 
+        MenuItem settingsItem = menu.findItem(R.id.mute);
+        // set your desired icon here based on a flag if you like
+        settingsItem.setIcon(getResources().getDrawable(R.drawable.ic_launcher));
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -820,12 +843,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("sound",!soundFlag);
+                editor.commit();
+                soundFlag = !soundFlag;
                 if(soundFlag) {
-                    item.setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode_off));
-                    soundFlag = !soundFlag;
-                }else{
                     item.setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode));
-                    soundFlag = !soundFlag;
+                }else{
+                    item.setIcon(getResources().getDrawable(android.R.drawable.ic_lock_silent_mode_off));
                 }
                 return true;
             default:
@@ -836,6 +859,14 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
     private void showToast(String msg) {
         if (toast != null) {
             toast.cancel();
+        }
+        if(!soundFlag) {
+            if (mp.isPlaying()) {
+                mp.stop();
+                mp.release();
+                mp = MediaPlayer.create(MainActivity.this, R.raw.soho);
+            }
+            mp.start();
         }
         toast = Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 350);
@@ -1018,12 +1049,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
             camera = null;
         }
     }
-
-    /*@Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mNotificationManager.cancel(notification_id);
-    }*/
 
     private void getCamera() {
         if (this.camera == null) {
